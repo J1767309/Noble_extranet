@@ -27,11 +27,15 @@ async function initPage() {
         return;
     }
 
-    // Show Hotel Tracker and BI Tools link for internal users
+    // Show internal links for internal users
     if (userData.user_type === 'internal') {
         const hotelTrackerLink = document.getElementById('hotel-tracker-link');
+        const hotelTopAccountsLink = document.getElementById('hotel-top-accounts-link');
+        const initiativesLink = document.getElementById('initiatives-link');
         const biToolsLink = document.getElementById('bi-tools-link');
         if (hotelTrackerLink) hotelTrackerLink.style.display = 'flex';
+        if (hotelTopAccountsLink) hotelTopAccountsLink.style.display = 'flex';
+        if (initiativesLink) initiativesLink.style.display = 'flex';
         if (biToolsLink) biToolsLink.style.display = 'flex';
     }
 

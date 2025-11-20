@@ -40,14 +40,22 @@ async function loadUserData() {
                 if (userMgmtCard) userMgmtCard.style.display = 'flex';
             }
 
-            // Show Hotel Tracker and BI Tools link and card only for internal users
+            // Show Hotel Tracker, Hotel Top Accounts, Initiatives, and BI Tools link and card only for internal users
             if (userData.user_type === 'internal') {
                 const hotelTrackerLink = document.getElementById('hotel-tracker-link');
                 const hotelTrackerCard = document.getElementById('hotel-tracker-card');
+                const hotelTopAccountsLink = document.getElementById('hotel-top-accounts-link');
+                const hotelTopAccountsCard = document.getElementById('hotel-top-accounts-card');
+                const initiativesLink = document.getElementById('initiatives-link');
+                const initiativesCard = document.getElementById('initiatives-card');
                 const biToolsLink = document.getElementById('bi-tools-link');
                 const biToolsCard = document.getElementById('bi-tools-card');
                 if (hotelTrackerLink) hotelTrackerLink.style.display = 'flex';
                 if (hotelTrackerCard) hotelTrackerCard.style.display = 'flex';
+                if (hotelTopAccountsLink) hotelTopAccountsLink.style.display = 'flex';
+                if (hotelTopAccountsCard) hotelTopAccountsCard.style.display = 'flex';
+                if (initiativesLink) initiativesLink.style.display = 'flex';
+                if (initiativesCard) initiativesCard.style.display = 'flex';
                 if (biToolsLink) biToolsLink.style.display = 'flex';
                 if (biToolsCard) biToolsCard.style.display = 'flex';
             }

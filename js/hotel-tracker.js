@@ -9,6 +9,7 @@ let editingEntryId = null;
 let editingEntryType = null; // 'hotel' or 'management'
 let entryToDelete = null;
 let deleteEntryType = null; // 'hotel' or 'management'
+let descriptionEditor = null;
 
 // Check authentication and restrict to internal users only
 async function initPage() {
@@ -35,12 +36,33 @@ async function initPage() {
 
     currentUser = userData;
 
+    // Show internal links
+    document.getElementById('hotel-tracker-link').style.display = 'flex';
+    document.getElementById('hotel-top-accounts-link').style.display = 'flex';
+    document.getElementById('initiatives-link').style.display = 'flex';
+    document.getElementById('bi-tools-link').style.display = 'flex';
+
     // Show user management link if admin
     if (userData.role === 'admin') {
         document.getElementById('user-management-link').style.display = 'flex';
-        // Show admin UI elements
+    }
+
+    // Role-based permissions for actions
+    // Admin: Full access (create, edit, delete)
+    // Creator: Can create and edit
+    // Editor: Can edit only
+    // Read-only: View only
+    const canCreate = userData.role === 'admin' || userData.role === 'creator';
+    const canEdit = userData.role === 'admin' || userData.role === 'creator' || userData.role === 'editor';
+    const canDelete = userData.role === 'admin';
+
+    // Show/hide UI elements based on permissions
+    if (canCreate) {
         document.getElementById('create-entry-btn').style.display = 'inline-flex';
         document.getElementById('manage-lists-btn').style.display = 'inline-flex';
+    }
+
+    if (canEdit || canDelete) {
         document.getElementById('hotel-actions-header').classList.add('show');
         document.getElementById('management-actions-header').classList.add('show');
     }
@@ -49,6 +71,49 @@ async function initPage() {
 
     await loadLookupData();
     await loadEntries();
+    initializeQuillEditor();
+}
+
+// Initialize Quill Rich Text Editor
+function initializeQuillEditor() {
+    // Wait for Quill to be available
+    if (typeof Quill === 'undefined') {
+        console.log('Waiting for Quill to load...');
+        setTimeout(initializeQuillEditor, 100);
+        return;
+    }
+
+    // Check if editor container exists
+    const editorContainer = document.getElementById('entry-description-long-editor');
+    if (!editorContainer) {
+        console.log('Waiting for editor container...');
+        setTimeout(initializeQuillEditor, 100);
+        return;
+    }
+
+    console.log('Initializing Quill editor for hotel tracker...');
+    try {
+        descriptionEditor = new Quill('#entry-description-long-editor', {
+            theme: 'snow',
+            placeholder: 'Enter detailed description (optional)...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'indent': '-1'}, { 'indent': '+1' }],
+                    [{ 'align': [] }],
+                    ['blockquote', 'code-block'],
+                    ['link'],
+                    ['clean']
+                ]
+            }
+        });
+        console.log('Quill editor initialized successfully for hotel tracker!');
+    } catch (error) {
+        console.error('Error initializing Quill editor:', error);
+    }
 }
 
 // Initialize page
@@ -263,27 +328,36 @@ function displayHotelEntries(entries) {
         });
 
         // Description long
-        const descriptionLong = entry.description_long ? entry.description_long.replace(/\n/g, '<br>') : '<span style="color: #9ca3af;">-</span>';
+        const descriptionLong = entry.description_long || '<span style="color: #9ca3af;">-</span>';
 
-        // Admin actions
+        // Role-based actions
         let actionsHtml = '';
-        if (currentUser?.role === 'admin') {
-            actionsHtml = `
-                <td class="tracker-actions">
+        const canEdit = currentUser && (currentUser.role === 'admin' || currentUser.role === 'creator' || currentUser.role === 'editor');
+        const canDelete = currentUser && currentUser.role === 'admin';
+
+        if (canEdit || canDelete) {
+            let buttonsHtml = '';
+            if (canEdit) {
+                buttonsHtml += `
                     <button class="btn-icon btn-edit" onclick="window.editHotelEntry('${entry.id}')" title="Edit">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                     </button>
+                `;
+            }
+            if (canDelete) {
+                buttonsHtml += `
                     <button class="btn-icon btn-delete" onclick="window.deleteHotelEntry('${entry.id}')" title="Delete">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         </svg>
                     </button>
-                </td>
-            `;
+                `;
+            }
+            actionsHtml = `<td class="tracker-actions">${buttonsHtml}</td>`;
         }
 
         tr.innerHTML = `
@@ -294,7 +368,7 @@ function displayHotelEntries(entries) {
             <td>${typeDisplay}</td>
             <td>${impactDisplay}</td>
             <td>${entry.description_short}</td>
-            <td style="max-width: 300px;">${descriptionLong}</td>
+            <td><div class="rich-text-display">${descriptionLong}</div></td>
             ${actionsHtml}
         `;
 
@@ -353,27 +427,36 @@ function displayManagementEntries(entries) {
         });
 
         // Description long
-        const descriptionLong = entry.description_long ? entry.description_long.replace(/\n/g, '<br>') : '<span style="color: #9ca3af;">-</span>';
+        const descriptionLong = entry.description_long || '<span style="color: #9ca3af;">-</span>';
 
-        // Admin actions
+        // Role-based actions
         let actionsHtml = '';
-        if (currentUser?.role === 'admin') {
-            actionsHtml = `
-                <td class="tracker-actions">
+        const canEdit = currentUser && (currentUser.role === 'admin' || currentUser.role === 'creator' || currentUser.role === 'editor');
+        const canDelete = currentUser && currentUser.role === 'admin';
+
+        if (canEdit || canDelete) {
+            let buttonsHtml = '';
+            if (canEdit) {
+                buttonsHtml += `
                     <button class="btn-icon btn-edit" onclick="window.editManagementEntry('${entry.id}')" title="Edit">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                     </button>
+                `;
+            }
+            if (canDelete) {
+                buttonsHtml += `
                     <button class="btn-icon btn-delete" onclick="window.deleteManagementEntry('${entry.id}')" title="Delete">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         </svg>
                     </button>
-                </td>
-            `;
+                `;
+            }
+            actionsHtml = `<td class="tracker-actions">${buttonsHtml}</td>`;
         }
 
         tr.innerHTML = `
@@ -382,7 +465,7 @@ function displayManagementEntries(entries) {
             <td>${currentDisplay}</td>
             <td>${typeDisplay}</td>
             <td>${entry.description_short}</td>
-            <td style="max-width: 300px;">${descriptionLong}</td>
+            <td><div class="rich-text-display">${descriptionLong}</div></td>
             ${actionsHtml}
         `;
 
@@ -505,6 +588,12 @@ document.getElementById('create-entry-btn')?.addEventListener('click', () => {
     editingEntryType = null;
     document.getElementById('entry-modal-title').textContent = 'Create New Entry';
     document.getElementById('entry-form').reset();
+
+    // Clear Quill editor
+    if (descriptionEditor) {
+        descriptionEditor.setText('');
+    }
+
     // Set default date to today
     document.getElementById('entry-date').valueAsDate = new Date();
     // Set default to hotel issue
@@ -541,7 +630,7 @@ document.getElementById('entry-form').addEventListener('submit', async (e) => {
                 is_current: document.getElementById('entry-current').value === 'true',
                 impact: document.getElementById('entry-impact').value,
                 description_short: document.getElementById('entry-description-short').value,
-                description_long: document.getElementById('entry-description-long').value || null
+                description_long: descriptionEditor.root.innerHTML.trim() === '<p><br></p>' ? null : descriptionEditor.root.innerHTML
             };
 
             if (editingEntryId && editingEntryType === 'hotel') {
@@ -570,7 +659,7 @@ document.getElementById('entry-form').addEventListener('submit', async (e) => {
                 type: document.getElementById('entry-type').value,
                 is_current: document.getElementById('entry-current').value === 'true',
                 description_short: document.getElementById('entry-description-short').value,
-                description_long: document.getElementById('entry-description-long').value || null
+                description_long: descriptionEditor.root.innerHTML.trim() === '<p><br></p>' ? null : descriptionEditor.root.innerHTML
             };
 
             if (editingEntryId && editingEntryType === 'management') {
@@ -621,7 +710,14 @@ window.editHotelEntry = async (entryId) => {
     document.getElementById('entry-current').value = entry.is_current.toString();
     document.getElementById('entry-impact').value = entry.impact || 'Medium';
     document.getElementById('entry-description-short').value = entry.description_short;
-    document.getElementById('entry-description-long').value = entry.description_long || '';
+
+    // Set Quill editor content
+    if (entry.description_long) {
+        descriptionEditor.root.innerHTML = entry.description_long;
+    } else {
+        descriptionEditor.setText('');
+    }
+
     document.getElementById('entry-modal').classList.add('active');
 };
 
@@ -643,7 +739,14 @@ window.editManagementEntry = async (entryId) => {
     document.getElementById('entry-type').value = entry.type;
     document.getElementById('entry-current').value = entry.is_current.toString();
     document.getElementById('entry-description-short').value = entry.description_short;
-    document.getElementById('entry-description-long').value = entry.description_long || '';
+
+    // Set Quill editor content
+    if (entry.description_long) {
+        descriptionEditor.root.innerHTML = entry.description_long;
+    } else {
+        descriptionEditor.setText('');
+    }
+
     document.getElementById('entry-modal').classList.add('active');
 };
 

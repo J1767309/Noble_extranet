@@ -70,7 +70,11 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     const name = document.getElementById('signup-name').value;
     const email = document.getElementById('signup-email').value;
     const password = document.getElementById('signup-password').value;
-    const userType = document.getElementById('signup-user-type').value;
+
+    // Security: All new signups default to external user with read-only role
+    // Only admins can change user_type and role via User Management
+    const userType = 'external';
+    const role = 'read-only';
 
     try {
         // Create user account
@@ -80,7 +84,8 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
             options: {
                 data: {
                     name: name,
-                    user_type: userType
+                    user_type: userType,
+                    role: role
                 }
             }
         });
@@ -96,6 +101,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
                     name: name,
                     email: email,
                     user_type: userType,
+                    role: role,
                     created_at: new Date().toISOString()
                 }
             ]);

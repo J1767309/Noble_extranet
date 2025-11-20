@@ -30,14 +30,32 @@ async function initPage() {
 
     currentUser = userData;
 
-    // Show Hotel Tracker link for internal users
+    // Show internal links
     document.getElementById('hotel-tracker-link').style.display = 'flex';
+    document.getElementById('hotel-top-accounts-link').style.display = 'flex';
+    document.getElementById('initiatives-link').style.display = 'flex';
+    document.getElementById('bi-tools-link').style.display = 'flex';
 
     // Show user management link if admin
     if (userData.role === 'admin') {
         document.getElementById('user-management-link').style.display = 'flex';
-        // Show admin UI elements
+    }
+
+    // Role-based permissions for actions
+    // Admin: Full access (create, edit, delete)
+    // Creator: Can create and edit
+    // Editor: Can edit only
+    // Read-only: View only
+    const canCreate = userData.role === 'admin' || userData.role === 'creator';
+    const canEdit = userData.role === 'admin' || userData.role === 'creator' || userData.role === 'editor';
+    const canDelete = userData.role === 'admin';
+
+    // Show/hide UI elements based on permissions
+    if (canCreate) {
         document.getElementById('create-tool-btn').style.display = 'inline-flex';
+    }
+
+    if (canEdit || canDelete) {
         document.getElementById('actions-header').classList.add('show');
     }
 
@@ -119,25 +137,34 @@ function displayTools(tools) {
             locationHtml = tool.location.replace(/\n/g, '<br>');
         }
 
-        // Admin actions
+        // Role-based actions
         let actionsHtml = '';
-        if (currentUser?.role === 'admin') {
-            actionsHtml = `
-                <td class="tool-actions">
+        const canEdit = currentUser && (currentUser.role === 'admin' || currentUser.role === 'creator' || currentUser.role === 'editor');
+        const canDelete = currentUser && currentUser.role === 'admin';
+
+        if (canEdit || canDelete) {
+            let buttonsHtml = '';
+            if (canEdit) {
+                buttonsHtml += `
                     <button class="btn-icon btn-edit" onclick="window.editTool('${tool.id}')" title="Edit">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                     </button>
+                `;
+            }
+            if (canDelete) {
+                buttonsHtml += `
                     <button class="btn-icon btn-delete" onclick="window.deleteTool('${tool.id}')" title="Delete">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                         </svg>
                     </button>
-                </td>
-            `;
+                `;
+            }
+            actionsHtml = `<td class="tool-actions">${buttonsHtml}</td>`;
         }
 
         tr.innerHTML = `
