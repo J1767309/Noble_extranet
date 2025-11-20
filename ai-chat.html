@@ -61,8 +61,11 @@
             background: white;
             border: 1px solid #e0e0e0;
             border-radius: 4px;
-            cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
         }
 
         .conversation-item:hover {
@@ -74,6 +77,12 @@
             background: #8B4513;
             color: white;
             border-color: #8B4513;
+        }
+
+        .conversation-content {
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
         }
 
         .conversation-title {
@@ -88,6 +97,46 @@
         .conversation-date {
             font-size: 12px;
             opacity: 0.7;
+        }
+
+        .delete-conversation-btn {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            padding: 6px;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.2s;
+            color: #666;
+        }
+
+        .conversation-item:hover .delete-conversation-btn {
+            opacity: 1;
+        }
+
+        .delete-conversation-btn:hover {
+            background: rgba(255, 0, 0, 0.1);
+            color: #dc3545;
+        }
+
+        .conversation-item.active .delete-conversation-btn {
+            color: white;
+            opacity: 0.7;
+        }
+
+        .conversation-item.active:hover .delete-conversation-btn {
+            opacity: 1;
+        }
+
+        .conversation-item.active .delete-conversation-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
         }
 
         .chat-main {

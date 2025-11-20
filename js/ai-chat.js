@@ -143,15 +143,32 @@ function renderConversations() {
 
     conversationsList.innerHTML = conversations.map(conv => `
         <div class="conversation-item ${conv.id === currentConversationId ? 'active' : ''}" data-id="${conv.id}">
-            <div class="conversation-title">${escapeHtml(conv.title)}</div>
-            <div class="conversation-date">${formatDate(conv.updated_at)}</div>
+            <div class="conversation-content">
+                <div class="conversation-title">${escapeHtml(conv.title)}</div>
+                <div class="conversation-date">${formatDate(conv.updated_at)}</div>
+            </div>
+            <button class="delete-conversation-btn" data-id="${conv.id}" title="Delete conversation">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </button>
         </div>
     `).join('')
 
-    // Add click listeners
+    // Add click listeners for loading conversations
     document.querySelectorAll('.conversation-item').forEach(item => {
-        item.addEventListener('click', () => {
+        const contentArea = item.querySelector('.conversation-content')
+        contentArea.addEventListener('click', () => {
             loadConversation(item.dataset.id)
+        })
+    })
+
+    // Add click listeners for delete buttons
+    document.querySelectorAll('.delete-conversation-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation() // Prevent loading conversation when clicking delete
+            deleteConversation(btn.dataset.id)
         })
     })
 }
@@ -211,6 +228,46 @@ function startNewConversation() {
 
     // Focus input
     chatInput.focus()
+}
+
+/**
+ * Delete a conversation
+ */
+async function deleteConversation(conversationId) {
+    // Confirm deletion
+    const conversation = conversations.find(c => c.id === conversationId)
+    const confirmMsg = conversation
+        ? `Delete "${conversation.title}"?\n\nThis will permanently delete the conversation and all its messages.`
+        : 'Delete this conversation?\n\nThis will permanently delete the conversation and all its messages.'
+
+    if (!confirm(confirmMsg)) {
+        return
+    }
+
+    try {
+        // Delete from database (messages will be cascaded automatically)
+        const { error } = await supabase
+            .from('chat_conversations')
+            .delete()
+            .eq('id', conversationId)
+
+        if (error) throw error
+
+        // Remove from local array
+        conversations = conversations.filter(c => c.id !== conversationId)
+
+        // If deleted conversation was active, start new conversation
+        if (currentConversationId === conversationId) {
+            startNewConversation()
+        }
+
+        // Re-render conversations list
+        renderConversations()
+
+    } catch (error) {
+        console.error('Error deleting conversation:', error)
+        alert('Error deleting conversation. Please try again.')
+    }
 }
 
 /**
