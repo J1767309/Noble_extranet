@@ -431,6 +431,9 @@ document.getElementById('reset-password-form').addEventListener('submit', async 
     submitBtn.textContent = 'Resetting...';
 
     try {
+        // Save email before closing modal (since closeResetPasswordModal sets userToResetPassword to null)
+        const userEmail = userToResetPassword.email;
+
         // Call Edge Function to reset user password
         const { data, error } = await supabase.functions.invoke('reset-user-password', {
             body: {
@@ -443,7 +446,7 @@ document.getElementById('reset-password-form').addEventListener('submit', async 
         if (data.error) throw new Error(data.error);
 
         closeResetPasswordModal();
-        showSuccess(`Password reset successfully for ${userToResetPassword.email}!`);
+        showSuccess(`Password reset successfully for ${userEmail}!`);
     } catch (error) {
         console.error('Error resetting password:', error);
         showError('Error resetting password: ' + error.message);
