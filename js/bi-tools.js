@@ -1,130 +1,9 @@
 import { supabase } from './supabase-config.js';
 
-// BI Tools data
-const biTools = [
-    {
-        number: 1,
-        name: "Weekly Forecast Sheet (Yellow sheet)",
-        description: "This report presents a weekly comparison of production metrics for hotels against multiple benchmarks: the Noble Budget, the forecast for the current month, the operational summary, the manager's budget, and the previous year's data",
-        frequency: "Weekly",
-        location: "Noble Dropbox/Monthly Forecasts",
-        link: null
-    },
-    {
-        number: 2,
-        name: "Monthly forecast (Blue sheet)",
-        description: "This report provides a monthly analysis of hotel production metrics, juxtaposing actual figures with various benchmarks: the Noble Budget, the manager's budget, the previous operational summary, the current operational summary, and the forecast for the respective months.",
-        frequency: "Monthly",
-        location: "Noble Dropbox/Monthly Forecasts",
-        link: null
-    },
-    {
-        number: 3,
-        name: "Email Report (In the Monthly Forecast)",
-        description: "The report provides a detailed summary for each hotel, covering the most recent month and year-to-date (YTD) performance, comparing actual results against the manager's budget, the Noble budget, and the previous year's figures. It highlights management issues in revenue and expenses and includes the most current Guest Satisfaction Survey (GSS) results.",
-        frequency: "Monthly",
-        location: "Tab in Noble Dropbox/Monthly Forecasts",
-        link: null
-    },
-    {
-        number: 4,
-        name: "Ops report",
-        description: "This report delivers an in-depth analysis of key performance indicators (KPIs) for each hotel, comparing the actuals from the past three years against current year budget and the forecasts for selected months. It quantifies the KPIs relative to the 2019 metrics, represented as a percentage. To further highlight performance discrepancies between the most recent operational summary and the last summary that was published and the variances budget",
-        frequency: "Monthly",
-        location: "Noble Dropbox/Monthly Forecasts",
-        link: null
-    },
-    {
-        number: 5,
-        name: "Ops memo",
-        description: "This report presents an overview of the U.S. market's current performance, updates on ongoing renovations across our hotel portfolio, and examination of portfolio-wide trends concerning Revenue per Available Room (RevPAR), Average Daily Rate (ADR), and Occupancy rates. Additionally, it examines market-specific factors influencing individual hotel forecasts and concludes with the latest forecasts from CBRE and LARC.",
-        frequency: "Monthly",
-        location: "Noble Dropbox/Monthly Forecasts",
-        link: null
-    },
-    {
-        number: 6,
-        name: "Monthly Stats report",
-        description: "The 'Monthly Hotel Statistics Report' provides a comprehensive performance review of the Noble Total Portfolio, revealing key financial metrics and market trends. It compares current ADR, RevPAR, and occupancy rates against past years and budget forecasts, noting a steady recovery yet challenges in achieving budget targets. The report concludes with a summary of revised growth forecasts from CBRE and LARC for the U.S. market",
-        frequency: "Monthly",
-        location: "Noble Dropbox/Asset Management Team Folder/Monthly Report Package",
-        link: null
-    },
-    {
-        number: 7,
-        name: "Tableau",
-        description: "• STR\n• Channel Contribution Report\n• Gov Per Diem\n• Hyatt Report: Koddi\n• Hilton Reports: Hilton Koddi, Hilton Loyalty Report\n• Labor Survey\n• Market Forecasts\n• Marriott Report: Loyalty Report, Koddi Marriott Report, Traffic Source Report\n• Travelads Report",
-        frequency: "Monthly",
-        location: "Link (URL to be added)",
-        link: null
-    },
-    {
-        number: 8,
-        name: "Marriott M-Dash: Topline Activators Report",
-        description: "A business intelligence tool that uses data visualization and dynamic reporting capabilities to consolidate Foundational/Critical Business Metrics into one place. It has the ability to drill down, dynamically filter, and compare portfolio level data in multiple avenues of reporting including web and mobile. The currently platform utilizes, Microsoft PowerBI that requires authentication through Microsoft via your Marriott EID. If you are currently signed in to Microsoft via your Noble account you will either need to sign out, or use a different web browser to access the platform",
-        frequency: "Daily",
-        location: "Link (URL to be added)",
-        link: null
-    },
-    {
-        number: 9,
-        name: "Hilton Owners Engagement Report",
-        description: "The Enterprise Engagement Snapshot visualizes key metrics (Commercial, Operational, and Initiative) for your portfolio of hotels in YTD, 6-month or 3-month increments.",
-        frequency: "Monthly",
-        location: "Link (URL to be added)",
-        link: null
-    },
-    {
-        number: 10,
-        name: "Demand360",
-        description: "The platform provides demand data by channel and segmentation for both historical and future time frames.",
-        frequency: "Daily",
-        location: "Link (URL to be added)",
-        link: null
-    },
-    {
-        number: 11,
-        name: "Noble Power BI",
-        description: "The platform provides a detailed expense analysis platform for each Noble hotels.",
-        frequency: "Monthly",
-        location: "Link (URL to be added)",
-        link: null
-    },
-    {
-        number: 12,
-        name: "Light House Report",
-        description: "The platform offers detailed insights into each hotel's performance by segment and includes access to forecasts from the system, the Revenue Management System (RMS), and inputs from the user",
-        frequency: "Daily",
-        location: "Link (URL to be added)",
-        link: null
-    },
-    {
-        number: 13,
-        name: "Hotel Initiatives Document",
-        description: "Asset manager documents, the hotels, expense, and revenue initiatives",
-        frequency: "Monthly",
-        location: "Asset Management Team Folder/Hotels/Initiatives",
-        link: null
-    },
-    {
-        number: 15,
-        name: "eCommerce Matrix",
-        description: "This report outlines the key e-commerce strategies recommended for each property, indicating the level of engagement by individual hotels in the specified tactics. It emphasizes that not every tactic is actively pursued; instead, participation is aligned with each property's strategic goals and initiatives",
-        frequency: "Monthly",
-        location: "Asset Management Team Folder/E-Commerce and Revenue Management",
-        link: null
-    },
-    {
-        number: 16,
-        name: "OneNote",
-        description: "Each one note, notebook contains detailed notes by each asset manager, as it pertains to each of their hotels",
-        frequency: "Monthly",
-        location: "• Steven\n• Lisa\n• Denise\n• Jody\n• Michael",
-        link: null
-    }
-];
-
-let allTools = [...biTools];
+let allTools = [];
+let currentUser = null;
+let editingToolId = null;
+let toolToDelete = null;
 
 // Check authentication and restrict to internal users only
 async function initPage() {
@@ -149,13 +28,18 @@ async function initPage() {
         return;
     }
 
+    currentUser = userData;
+
     // Show user management link if admin
     if (userData.role === 'admin') {
         document.getElementById('user-management-link').style.display = 'flex';
+        // Show admin UI elements
+        document.getElementById('create-tool-btn').style.display = 'inline-flex';
+        document.getElementById('actions-header').classList.add('show');
     }
 
     document.getElementById('user-email').textContent = session.user.email;
-    displayTools(allTools);
+    await loadTools();
 }
 
 // Initialize page
@@ -178,13 +62,32 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
     }
 });
 
+// Load tools from database
+async function loadTools() {
+    try {
+        const { data, error } = await supabase
+            .from('bi_tools')
+            .select('*')
+            .order('number', { ascending: true });
+
+        if (error) throw error;
+
+        allTools = data || [];
+        displayTools(allTools);
+    } catch (error) {
+        console.error('Error loading tools:', error);
+        alert('Error loading BI tools. Please refresh the page.');
+    }
+}
+
 // Display tools in table
 function displayTools(tools) {
     const tbody = document.getElementById('tools-table-body');
     tbody.innerHTML = '';
 
     if (tools.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 3rem; color: #6b7280;">No tools found</td></tr>';
+        const colspan = currentUser?.role === 'admin' ? '6' : '5';
+        tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 3rem; color: #6b7280;">No tools found</td></tr>`;
         return;
     }
 
@@ -213,12 +116,34 @@ function displayTools(tools) {
             locationHtml = tool.location.replace(/\n/g, '<br>');
         }
 
+        // Admin actions
+        let actionsHtml = '';
+        if (currentUser?.role === 'admin') {
+            actionsHtml = `
+                <td class="tool-actions">
+                    <button class="btn-icon btn-edit" onclick="window.editTool('${tool.id}')" title="Edit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+                    <button class="btn-icon btn-delete" onclick="window.deleteTool('${tool.id}')" title="Delete">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </td>
+            `;
+        }
+
         tr.innerHTML = `
             <td class="tool-number">${tool.number}</td>
             <td class="tool-name">${tool.name}</td>
             <td class="tool-description">${tool.description.replace(/\n/g, '<br>')}</td>
             <td class="tool-frequency">${frequencyBadge}</td>
             <td class="tool-link">${locationHtml}</td>
+            ${actionsHtml}
         `;
 
         tbody.appendChild(tr);
@@ -241,4 +166,129 @@ document.getElementById('search-input').addEventListener('input', (e) => {
     });
 
     displayTools(filtered);
+});
+
+// Create tool button
+document.getElementById('create-tool-btn')?.addEventListener('click', () => {
+    editingToolId = null;
+    document.getElementById('tool-modal-title').textContent = 'Create New Tool';
+    document.getElementById('tool-form').reset();
+    document.getElementById('tool-modal').classList.add('active');
+});
+
+// Cancel tool button
+document.getElementById('cancel-tool-btn').addEventListener('click', () => {
+    document.getElementById('tool-modal').classList.remove('active');
+});
+
+// Tool form submission
+document.getElementById('tool-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const toolData = {
+        number: parseInt(document.getElementById('tool-number').value),
+        name: document.getElementById('tool-name').value,
+        description: document.getElementById('tool-description').value,
+        frequency: document.getElementById('tool-frequency').value,
+        location: document.getElementById('tool-location').value,
+        link: document.getElementById('tool-link').value || null
+    };
+
+    try {
+        if (editingToolId) {
+            // Update existing tool
+            const { error } = await supabase
+                .from('bi_tools')
+                .update(toolData)
+                .eq('id', editingToolId);
+
+            if (error) throw error;
+            alert('Tool updated successfully!');
+        } else {
+            // Create new tool
+            const { error } = await supabase
+                .from('bi_tools')
+                .insert([toolData]);
+
+            if (error) throw error;
+            alert('Tool created successfully!');
+        }
+
+        document.getElementById('tool-modal').classList.remove('active');
+        await loadTools();
+    } catch (error) {
+        console.error('Error saving tool:', error);
+        if (error.code === '23505') {
+            alert('A tool with this number already exists. Please use a different number.');
+        } else {
+            alert('Error saving tool: ' + error.message);
+        }
+    }
+});
+
+// Edit tool function (exposed to window for onclick)
+window.editTool = async (toolId) => {
+    const tool = allTools.find(t => t.id === toolId);
+    if (!tool) return;
+
+    editingToolId = toolId;
+    document.getElementById('tool-modal-title').textContent = 'Edit Tool';
+    document.getElementById('tool-number').value = tool.number;
+    document.getElementById('tool-name').value = tool.name;
+    document.getElementById('tool-description').value = tool.description;
+    document.getElementById('tool-frequency').value = tool.frequency;
+    document.getElementById('tool-location').value = tool.location;
+    document.getElementById('tool-link').value = tool.link || '';
+    document.getElementById('tool-modal').classList.add('active');
+};
+
+// Delete tool function (exposed to window for onclick)
+window.deleteTool = (toolId) => {
+    const tool = allTools.find(t => t.id === toolId);
+    if (!tool) return;
+
+    toolToDelete = toolId;
+    document.getElementById('delete-tool-name').textContent = tool.name;
+    document.getElementById('delete-tool-modal').classList.add('active');
+};
+
+// Cancel delete button
+document.getElementById('cancel-delete-btn').addEventListener('click', () => {
+    document.getElementById('delete-tool-modal').classList.remove('active');
+    toolToDelete = null;
+});
+
+// Confirm delete button
+document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+    if (!toolToDelete) return;
+
+    try {
+        const { error } = await supabase
+            .from('bi_tools')
+            .delete()
+            .eq('id', toolToDelete);
+
+        if (error) throw error;
+
+        alert('Tool deleted successfully!');
+        document.getElementById('delete-tool-modal').classList.remove('active');
+        toolToDelete = null;
+        await loadTools();
+    } catch (error) {
+        console.error('Error deleting tool:', error);
+        alert('Error deleting tool: ' + error.message);
+    }
+});
+
+// Close modals when clicking outside
+document.getElementById('tool-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'tool-modal') {
+        document.getElementById('tool-modal').classList.remove('active');
+    }
+});
+
+document.getElementById('delete-tool-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'delete-tool-modal') {
+        document.getElementById('delete-tool-modal').classList.remove('active');
+    }
 });
