@@ -199,6 +199,21 @@
             color: #991b1b;
         }
 
+        .clickable-badge {
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            user-select: none;
+        }
+
+        .clickable-badge:hover {
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+
+        .clickable-badge:active {
+            transform: scale(0.95);
+        }
+
         .search-section {
             background: white;
             border-radius: 8px;

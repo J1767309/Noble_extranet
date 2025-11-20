@@ -209,19 +209,25 @@ function displayHotelEntries(entries) {
     sortedEntries.forEach(entry => {
         const tr = document.createElement('tr');
 
-        // Type badge
+        // Type badge (clickable for admins)
         const typeClass = entry.type === 'Issue' ? 'type-issue' : 'type-tactic';
-        const typeBadge = `<span class="type-badge ${typeClass}">${entry.type}</span>`;
+        const typeClickable = currentUser?.role === 'admin' ? 'clickable-badge' : '';
+        const typeOnclick = currentUser?.role === 'admin' ? `onclick="window.toggleHotelType('${entry.id}', '${entry.type}')"` : '';
+        const typeBadge = `<span class="type-badge ${typeClass} ${typeClickable}" ${typeOnclick} title="${currentUser?.role === 'admin' ? 'Click to toggle' : ''}">${entry.type}</span>`;
 
-        // Current badge
+        // Current badge (clickable for admins)
         const currentClass = entry.is_current ? 'current-yes' : 'current-no';
         const currentText = entry.is_current ? 'Yes' : 'No';
-        const currentBadge = `<span class="current-badge ${currentClass}">${currentText}</span>`;
+        const currentClickable = currentUser?.role === 'admin' ? 'clickable-badge' : '';
+        const currentOnclick = currentUser?.role === 'admin' ? `onclick="window.toggleHotelCurrent('${entry.id}', ${entry.is_current})"` : '';
+        const currentBadge = `<span class="current-badge ${currentClass} ${currentClickable}" ${currentOnclick} title="${currentUser?.role === 'admin' ? 'Click to toggle' : ''}">${currentText}</span>`;
 
-        // Impact badge
+        // Impact badge (clickable for admins)
         const impactClass = entry.impact === 'High' ? 'impact-high' :
                            entry.impact === 'Medium' ? 'impact-medium' : 'impact-low';
-        const impactBadge = `<span class="impact-badge ${impactClass}">${entry.impact || 'Medium'}</span>`;
+        const impactClickable = currentUser?.role === 'admin' ? 'clickable-badge' : '';
+        const impactOnclick = currentUser?.role === 'admin' ? `onclick="window.cycleHotelImpact('${entry.id}', '${entry.impact || 'Medium'}')"` : '';
+        const impactBadge = `<span class="impact-badge ${impactClass} ${impactClickable}" ${impactOnclick} title="${currentUser?.role === 'admin' ? 'Click to cycle' : ''}">${entry.impact || 'Medium'}</span>`;
 
         // Format date
         const dateFormatted = new Date(entry.date_reported).toLocaleDateString('en-US', {
@@ -284,14 +290,18 @@ function displayManagementEntries(entries) {
     entries.forEach(entry => {
         const tr = document.createElement('tr');
 
-        // Type badge
+        // Type badge (clickable for admins)
         const typeClass = entry.type === 'Issue' ? 'type-issue' : 'type-tactic';
-        const typeBadge = `<span class="type-badge ${typeClass}">${entry.type}</span>`;
+        const typeClickable = currentUser?.role === 'admin' ? 'clickable-badge' : '';
+        const typeOnclick = currentUser?.role === 'admin' ? `onclick="window.toggleManagementType('${entry.id}', '${entry.type}')"` : '';
+        const typeBadge = `<span class="type-badge ${typeClass} ${typeClickable}" ${typeOnclick} title="${currentUser?.role === 'admin' ? 'Click to toggle' : ''}">${entry.type}</span>`;
 
-        // Current badge
+        // Current badge (clickable for admins)
         const currentClass = entry.is_current ? 'current-yes' : 'current-no';
         const currentText = entry.is_current ? 'Yes' : 'No';
-        const currentBadge = `<span class="current-badge ${currentClass}">${currentText}</span>`;
+        const currentClickable = currentUser?.role === 'admin' ? 'clickable-badge' : '';
+        const currentOnclick = currentUser?.role === 'admin' ? `onclick="window.toggleManagementCurrent('${entry.id}', ${entry.is_current})"` : '';
+        const currentBadge = `<span class="current-badge ${currentClass} ${currentClickable}" ${currentOnclick} title="${currentUser?.role === 'admin' ? 'Click to toggle' : ''}">${currentText}</span>`;
 
         // Format date
         const dateFormatted = new Date(entry.date_reported).toLocaleDateString('en-US', {
@@ -917,6 +927,90 @@ window.deleteCompany = async (companyId) => {
     } catch (error) {
         console.error('Error deleting company:', error);
         alert('Error deleting company: ' + error.message);
+    }
+};
+
+// Quick edit functions for hotel entries
+window.toggleHotelCurrent = async (entryId, currentValue) => {
+    try {
+        const { error } = await supabase
+            .from('hotel_tracker')
+            .update({ is_current: !currentValue })
+            .eq('id', entryId);
+
+        if (error) throw error;
+        await loadEntries();
+    } catch (error) {
+        console.error('Error updating current status:', error);
+        alert('Error updating status: ' + error.message);
+    }
+};
+
+window.toggleHotelType = async (entryId, currentType) => {
+    const newType = currentType === 'Issue' ? 'Tactic' : 'Issue';
+
+    try {
+        const { error } = await supabase
+            .from('hotel_tracker')
+            .update({ type: newType })
+            .eq('id', entryId);
+
+        if (error) throw error;
+        await loadEntries();
+    } catch (error) {
+        console.error('Error updating type:', error);
+        alert('Error updating type: ' + error.message);
+    }
+};
+
+window.cycleHotelImpact = async (entryId, currentImpact) => {
+    const impactCycle = { 'Low': 'Medium', 'Medium': 'High', 'High': 'Low' };
+    const newImpact = impactCycle[currentImpact] || 'Medium';
+
+    try {
+        const { error } = await supabase
+            .from('hotel_tracker')
+            .update({ impact: newImpact })
+            .eq('id', entryId);
+
+        if (error) throw error;
+        await loadEntries();
+    } catch (error) {
+        console.error('Error updating impact:', error);
+        alert('Error updating impact: ' + error.message);
+    }
+};
+
+// Quick edit functions for management entries
+window.toggleManagementCurrent = async (entryId, currentValue) => {
+    try {
+        const { error } = await supabase
+            .from('management_tracker')
+            .update({ is_current: !currentValue })
+            .eq('id', entryId);
+
+        if (error) throw error;
+        await loadEntries();
+    } catch (error) {
+        console.error('Error updating current status:', error);
+        alert('Error updating status: ' + error.message);
+    }
+};
+
+window.toggleManagementType = async (entryId, currentType) => {
+    const newType = currentType === 'Issue' ? 'Tactic' : 'Issue';
+
+    try {
+        const { error } = await supabase
+            .from('management_tracker')
+            .update({ type: newType })
+            .eq('id', entryId);
+
+        if (error) throw error;
+        await loadEntries();
+    } catch (error) {
+        console.error('Error updating type:', error);
+        alert('Error updating type: ' + error.message);
     }
 };
 
