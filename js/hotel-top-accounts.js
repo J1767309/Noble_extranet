@@ -205,7 +205,7 @@ function displayAccounts(accounts) {
     tbody.innerHTML = '';
 
     if (accounts.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align: center; padding: 2rem;">No accounts found</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" style="text-align: center; padding: 2rem;">No accounts found</td></tr>`;
         return;
     }
 
@@ -227,6 +227,13 @@ function displayAccounts(accounts) {
         // Status badge
         const statusClass = `status-${account.status.toLowerCase()}`;
         const statusBadge = `<span class="status-badge ${statusClass}">${account.status}</span>`;
+
+        // Format updated_at timestamp
+        const updatedAt = account.updated_at ? new Date(account.updated_at).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        }) : '-';
 
         // Role-based actions
         let actionsHtml = '';
@@ -261,6 +268,7 @@ function displayAccounts(accounts) {
             <td>${segment}</td>
             <td>${statusBadge}</td>
             <td><div class="rich-text-display">${descriptionLong}</div></td>
+            <td>${updatedAt}</td>
             ${actionsHtml}
         `;
 

@@ -203,7 +203,7 @@ function displayInitiatives(initiatives) {
     tbody.innerHTML = '';
 
     if (initiatives.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem;">No initiatives found</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem;">No initiatives found</td></tr>`;
         return;
     }
 
@@ -217,6 +217,13 @@ function displayInitiatives(initiatives) {
         // Status badge
         const statusClass = `status-${initiative.status.toLowerCase().replace(' ', '-')}`;
         const statusBadge = `<span class="status-badge ${statusClass}">${initiative.status}</span>`;
+
+        // Format updated_at timestamp
+        const updatedAt = initiative.updated_at ? new Date(initiative.updated_at).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+        }) : '-';
 
         // Role-based actions
         let actionsHtml = '';
@@ -245,6 +252,7 @@ function displayInitiatives(initiatives) {
             <td>${typeBadge}</td>
             <td><div class="rich-text-display">${initiative.initiative_text || '-'}</div></td>
             <td>${statusBadge}</td>
+            <td>${updatedAt}</td>
             ${actionsHtml}
         `;
 
