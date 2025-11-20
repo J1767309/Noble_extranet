@@ -371,7 +371,7 @@ Now answer the user's question based on this data:`
  * Call Google Gemini API
  */
 async function callGeminiAPI(messages: any[], useGrounding: boolean) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`
+  const url = `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`
 
   const requestBody: any = {
     contents: messages,
