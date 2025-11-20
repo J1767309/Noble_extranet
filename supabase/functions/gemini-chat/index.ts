@@ -168,8 +168,8 @@ async function buildRAGContext(
   const hotels: string[] = []
   let contextParts: string[] = []
 
-  // Extract potential hotel names from the query
-  const hotelKeywords = extractHotelKeywords(query)
+  // Extract potential hotel names from the query (now returns full names and individual keywords)
+  const { fullNames, keywords } = extractHotelKeywords(query)
 
   // Check if user has access to internal data
   const isInternal = userData?.user_type === 'internal'
@@ -177,17 +177,19 @@ async function buildRAGContext(
   try {
     // 1. Query Partner Notes (internal only, rich strategic information)
     if (isInternal) {
-      const { data: partnerNotes } = await supabase
+      // Fetch all recent partner notes
+      const { data: allPartnerNotes } = await supabase
         .from('hotel_partner_notes')
         .select('*')
-        .or(hotelKeywords.length > 0
-          ? hotelKeywords.map(h => `hotel_name.ilike.%${h}%`).join(',')
-          : 'id.not.is.null'
-        )
         .order('review_date', { ascending: false })
-        .limit(5)
+        .limit(20) // Get more, then filter
 
-      if (partnerNotes && partnerNotes.length > 0) {
+      if (allPartnerNotes && allPartnerNotes.length > 0) {
+        // Filter to only matching hotels
+        const partnerNotes = allPartnerNotes.filter((note: any) =>
+          matchesTargetHotel(note.hotel_name, fullNames, keywords)
+        ).slice(0, 5) // Limit to 5 after filtering
+
         partnerNotes.forEach((note: any) => {
           hotels.push(note.hotel_name)
           contextParts.push(`
@@ -205,17 +207,20 @@ async function buildRAGContext(
 
     // 2. Query Hotel Tracker (internal only, operational issues/tactics)
     if (isInternal) {
-      const { data: trackerData } = await supabase
+      // Fetch all current tracker entries
+      const { data: allTrackerData } = await supabase
         .from('hotel_tracker')
         .select('*, hotels(name), management_companies(name)')
         .eq('is_current', true)
-        .or(hotelKeywords.length > 0
-          ? hotelKeywords.map(h => `hotels.name.ilike.%${h}%`).join(',')
-          : 'id.not.is.null'
-        )
-        .limit(10)
+        .limit(50) // Get more, then filter
 
-      if (trackerData && trackerData.length > 0) {
+      if (allTrackerData && allTrackerData.length > 0) {
+        // Filter to only matching hotels
+        const trackerData = allTrackerData.filter((entry: any) => {
+          const hotelName = entry.hotels?.name || ''
+          return matchesTargetHotel(hotelName, fullNames, keywords)
+        }).slice(0, 10) // Limit to 10 after filtering
+
         trackerData.forEach((entry: any) => {
           const hotelName = entry.hotels?.name || 'Unknown Hotel'
           hotels.push(hotelName)
@@ -233,16 +238,18 @@ async function buildRAGContext(
 
     // 3. Query Top Accounts (internal only)
     if (isInternal) {
-      const { data: accounts } = await supabase
+      // Fetch all accounts
+      const { data: allAccounts } = await supabase
         .from('hotel_top_accounts')
         .select('*')
-        .or(hotelKeywords.length > 0
-          ? hotelKeywords.map(h => `hotel_name.ilike.%${h}%`).join(',')
-          : 'id.not.is.null'
-        )
-        .limit(10)
+        .limit(100) // Get more, then filter
 
-      if (accounts && accounts.length > 0) {
+      if (allAccounts && allAccounts.length > 0) {
+        // Filter to only matching hotels
+        const accounts = allAccounts.filter((account: any) =>
+          matchesTargetHotel(account.hotel_name, fullNames, keywords)
+        ).slice(0, 20) // Limit to 20 after filtering
+
         const accountsByHotel = accounts.reduce((acc: any, account: any) => {
           if (!acc[account.hotel_name]) {
             acc[account.hotel_name] = []
@@ -267,16 +274,18 @@ async function buildRAGContext(
 
     // 4. Query Initiatives (internal only)
     if (isInternal) {
-      const { data: initiatives } = await supabase
+      // Fetch all initiatives
+      const { data: allInitiatives } = await supabase
         .from('initiatives')
         .select('*')
-        .or(hotelKeywords.length > 0
-          ? hotelKeywords.map(h => `hotel_name.ilike.%${h}%`).join(',')
-          : 'id.not.is.null'
-        )
-        .limit(10)
+        .limit(100) // Get more, then filter
 
-      if (initiatives && initiatives.length > 0) {
+      if (allInitiatives && allInitiatives.length > 0) {
+        // Filter to only matching hotels
+        const initiatives = allInitiatives.filter((initiative: any) =>
+          matchesTargetHotel(initiative.hotel_name, fullNames, keywords)
+        ).slice(0, 10) // Limit to 10 after filtering
+
         initiatives.forEach((initiative: any) => {
           hotels.push(initiative.hotel_name)
           contextParts.push(`
@@ -291,16 +300,18 @@ async function buildRAGContext(
     }
 
     // 5. Query Hotel Projects (accessible to all users)
-    const { data: projects } = await supabase
+    // Fetch all projects
+    const { data: allProjects } = await supabase
       .from('hotel_projects')
       .select('*')
-      .or(hotelKeywords.length > 0
-        ? hotelKeywords.map(h => `name.ilike.%${h}%`).join(',')
-        : 'id.not.is.null'
-      )
-      .limit(5)
+      .limit(50) // Get more, then filter
 
-    if (projects && projects.length > 0) {
+    if (allProjects && allProjects.length > 0) {
+      // Filter to only matching hotels
+      const projects = allProjects.filter((project: any) =>
+        matchesTargetHotel(project.name, fullNames, keywords)
+      ).slice(0, 5) // Limit to 5 after filtering
+
       projects.forEach((project: any) => {
         hotels.push(project.name)
         contextParts.push(`
@@ -339,14 +350,16 @@ function buildSystemPrompt(userData: any, contextData: any): string {
 **User Access Level**: ${isInternal ? 'Internal User (Full Access)' : 'External User (Limited Access)'}
 
 **Instructions**:
-- Answer questions based on the provided hotel data below
+- Answer questions based ONLY on the provided hotel data below
 - Be specific and cite which hotels you're referencing
+- IMPORTANT: Pay close attention to hotel names - "Hyatt House Raleigh" is different from "Hyatt House Tallahassee"
+- Only use data from the exact hotel mentioned in the query
 - If asked about data you don't have access to, clearly state that
 - For financial or sensitive information, remind external users to contact Noble staff
 - Be professional and concise
-- If you don't have the information, say so rather than making assumptions
+- If you don't have the information for the specific hotel requested, say so rather than providing data from a different hotel
 
-**Data Available**:
+**Data Available (filtered to match the query)**:
 ${contextData.context}
 
 ---
@@ -413,32 +426,82 @@ async function callGeminiAPI(messages: any[], useGrounding: boolean) {
 }
 
 /**
- * Extract potential hotel names from query
+ * Extract potential hotel names from query with better matching
+ * Returns both full hotel name matches and individual keywords
  */
-function extractHotelKeywords(query: string): string[] {
+function extractHotelKeywords(query: string): { fullNames: string[], keywords: string[] } {
+  const queryLower = query.toLowerCase()
+  const fullNames: string[] = []
   const keywords: string[] = []
 
-  // Common hotel brands in Noble's portfolio
-  const brands = [
-    'Renaissance', 'Hyatt House', 'SpringHill', 'Courtyard', 'Residence Inn',
-    'Hampton', 'Homewood', 'Hilton', 'Marriott', 'Doubletree'
+  // Known hotel full names (exact matches get highest priority)
+  const knownHotels = [
+    'Renaissance Raleigh',
+    'Hyatt House Raleigh',
+    'SpringHill Suites OSU',
+    'Courtyard Reading',
+    'Courtyard Settlers Ridge',
+    'Residence Inn Philadelphia Malvern',
+    'Hyatt House Tallahassee'
   ]
 
-  // City names (from the data we've seen)
-  const cities = [
-    'Raleigh', 'OSU', 'Reading', 'Settlers Ridge', 'Pittsburgh', 'Malvern', 'Philadelphia',
-    'Columbus', 'Durham'
-  ]
-
-  const allKeywords = [...brands, ...cities]
-
-  allKeywords.forEach(keyword => {
-    if (query.toLowerCase().includes(keyword.toLowerCase())) {
-      keywords.push(keyword)
+  // Check for full hotel name matches first (most specific)
+  knownHotels.forEach(hotel => {
+    if (queryLower.includes(hotel.toLowerCase())) {
+      fullNames.push(hotel)
     }
   })
 
-  return keywords
+  // If no full match, extract brand and city keywords
+  if (fullNames.length === 0) {
+    // Common hotel brands in Noble's portfolio
+    const brands = [
+      'Renaissance', 'Hyatt House', 'SpringHill Suites', 'SpringHill',
+      'Courtyard', 'Residence Inn', 'Hampton', 'Homewood', 'Hilton',
+      'Marriott', 'Doubletree'
+    ]
+
+    // City names (from the data we've seen)
+    const cities = [
+      'Raleigh', 'OSU', 'Reading', 'Settlers Ridge', 'Pittsburgh',
+      'Malvern', 'Philadelphia', 'Columbus', 'Durham', 'Tallahassee'
+    ]
+
+    brands.forEach(brand => {
+      if (queryLower.includes(brand.toLowerCase())) {
+        keywords.push(brand)
+      }
+    })
+
+    cities.forEach(city => {
+      if (queryLower.includes(city.toLowerCase())) {
+        keywords.push(city)
+      }
+    })
+  }
+
+  return { fullNames, keywords }
+}
+
+/**
+ * Filter hotel data to match only the specific hotel requested
+ * Prevents "Hyatt House Raleigh" from matching "Hyatt House Tallahassee"
+ */
+function matchesTargetHotel(hotelName: string, fullNames: string[], keywords: string[]): boolean {
+  const hotelNameLower = hotelName.toLowerCase()
+
+  // If we have full hotel names, require exact match
+  if (fullNames.length > 0) {
+    return fullNames.some(fullName => hotelNameLower === fullName.toLowerCase())
+  }
+
+  // If only keywords, ALL keywords must be present in the hotel name
+  if (keywords.length > 0) {
+    return keywords.every(keyword => hotelNameLower.includes(keyword.toLowerCase()))
+  }
+
+  // No filters - return all (fallback for general queries)
+  return true
 }
 
 /**
