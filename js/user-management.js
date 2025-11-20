@@ -27,9 +27,11 @@ async function initPage() {
         return;
     }
 
-    // Show BI Tools link for internal users
+    // Show Hotel Tracker and BI Tools link for internal users
     if (userData.user_type === 'internal') {
+        const hotelTrackerLink = document.getElementById('hotel-tracker-link');
         const biToolsLink = document.getElementById('bi-tools-link');
+        if (hotelTrackerLink) hotelTrackerLink.style.display = 'flex';
         if (biToolsLink) biToolsLink.style.display = 'flex';
     }
 

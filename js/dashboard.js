@@ -40,10 +40,14 @@ async function loadUserData() {
                 if (userMgmtCard) userMgmtCard.style.display = 'flex';
             }
 
-            // Show BI Tools link and card only for internal users
+            // Show Hotel Tracker and BI Tools link and card only for internal users
             if (userData.user_type === 'internal') {
+                const hotelTrackerLink = document.getElementById('hotel-tracker-link');
+                const hotelTrackerCard = document.getElementById('hotel-tracker-card');
                 const biToolsLink = document.getElementById('bi-tools-link');
                 const biToolsCard = document.getElementById('bi-tools-card');
+                if (hotelTrackerLink) hotelTrackerLink.style.display = 'flex';
+                if (hotelTrackerCard) hotelTrackerCard.style.display = 'flex';
                 if (biToolsLink) biToolsLink.style.display = 'flex';
                 if (biToolsCard) biToolsCard.style.display = 'flex';
             }

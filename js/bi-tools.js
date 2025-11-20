@@ -30,6 +30,9 @@ async function initPage() {
 
     currentUser = userData;
 
+    // Show Hotel Tracker link for internal users
+    document.getElementById('hotel-tracker-link').style.display = 'flex';
+
     // Show user management link if admin
     if (userData.role === 'admin') {
         document.getElementById('user-management-link').style.display = 'flex';

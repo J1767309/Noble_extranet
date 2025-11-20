@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Tracker - Noble</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .tracker-table-container {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .tracker-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .tracker-table thead {
+            background: #f9fafb;
+        }
+
+        .tracker-table th {
+            padding: 0.875rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        .tracker-table td {
+            padding: 0.875rem;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: top;
+        }
+
+        /* Column widths for better readability */
+        .tracker-table th:nth-child(1),
+        .tracker-table td:nth-child(1) {
+            width: 12%;
+            max-width: 150px;
+        }
+
+        .tracker-table th:nth-child(2),
+        .tracker-table td:nth-child(2) {
+            width: 10%;
+            max-width: 120px;
+        }
+
+        .tracker-table th:nth-child(3),
+        .tracker-table td:nth-child(3) {
+            width: 8%;
+            white-space: nowrap;
+        }
+
+        .tracker-table th:nth-child(4),
+        .tracker-table td:nth-child(4) {
+            width: 6%;
+            white-space: nowrap;
+        }
+
+        .tracker-table th:nth-child(5),
+        .tracker-table td:nth-child(5) {
+            width: 6%;
+            white-space: nowrap;
+        }
+
+        .tracker-table th:nth-child(6),
+        .tracker-table td:nth-child(6) {
+            width: 18%;
+            word-wrap: break-word;
+        }
+
+        .tracker-table th:nth-child(7),
+        .tracker-table td:nth-child(7) {
+            width: 35%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .tracker-table th:nth-child(8),
+        .tracker-table td:nth-child(8) {
+            width: 5%;
+            white-space: nowrap;
+        }
+
+        .tracker-table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .type-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .type-issue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .type-tactic {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .current-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .current-yes {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .current-no {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .search-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .search-filters {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.875rem;
+        }
+
+        .search-input, .filter-select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .search-input:focus, .filter-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .tracker-actions {
+            display: flex;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn-icon {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #f3f4f6;
+            color: #374151;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-icon.btn-edit:hover {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .btn-icon.btn-delete:hover {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #1a1a1a;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        .admin-actions-header {
+            display: none;
+        }
+
+        .admin-actions-header.show {
+            display: table-cell;
+        }
+
+        .page-header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        @media (max-width: 1024px) {
+            .search-filters {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .search-filters {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="has-sidebar">
+    <!-- Top Header -->
+    <header class="top-header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="images/noble-logo.png" alt="Noble Investment Group" class="logo-small">
+                <span class="nav-title">Noble</span>
+            </div>
+            <div class="header-actions">
+                <span id="user-email" class="user-info"></span>
+                <button id="change-password-btn" class="btn btn-secondary">Change Password</button>
+                <button id="logout-btn" class="btn btn-secondary">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="sidebar-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="hotel-openings.html" class="sidebar-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Hotel Openings</span>
+            </a>
+            <a href="hotel-tracker.html" class="sidebar-link active" id="hotel-tracker-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Hotel Tracker</span>
+            </a>
+            <a href="bi-tools.html" class="sidebar-link" id="bi-tools-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                <span>BI Tools</span>
+            </a>
+            <a href="user-management.html" class="sidebar-link" id="user-management-link" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span>User Management</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <div>
+                <h1>Hotel Tracker</h1>
+                <p class="subtitle">Track hotel issues and tactics</p>
+            </div>
+            <div class="page-header-actions">
+                <button id="manage-lists-btn" class="btn btn-secondary" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6m5.5-11.5l-4.2 4.2m-2.6 2.6l-4.2 4.2m11.5-5.5l-4.2-4.2m-2.6-2.6l-4.2-4.2"></path>
+                    </svg>
+                    Manage Lists
+                </button>
+                <button id="create-entry-btn" class="btn btn-primary" style="display: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    New Entry
+                </button>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="search-section">
+            <div class="search-filters">
+                <div class="filter-group">
+                    <label for="search-input">Search</label>
+                    <input type="text" id="search-input" class="search-input" placeholder="Search hotels, descriptions...">
+                </div>
+                <div class="filter-group">
+                    <label for="filter-type">Type</label>
+                    <select id="filter-type" class="filter-select">
+                        <option value="">All Types</option>
+                        <option value="Issue">Issue</option>
+                        <option value="Tactic">Tactic</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-current">Status</label>
+                    <select id="filter-current" class="filter-select">
+                        <option value="">All</option>
+                        <option value="true">Current</option>
+                        <option value="false">Not Current</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-hotel">Hotel</label>
+                    <select id="filter-hotel" class="filter-select">
+                        <option value="">All Hotels</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filter-company">Management Company</label>
+                    <select id="filter-company" class="filter-select">
+                        <option value="">All Companies</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tracker Table -->
+        <div class="tracker-table-container">
+            <table class="tracker-table">
+                <thead>
+                    <tr>
+                        <th>Hotel Name</th>
+                        <th>Management Company</th>
+                        <th>Date Reported</th>
+                        <th>Current</th>
+                        <th>Type</th>
+                        <th>Description Short</th>
+                        <th>Description Long</th>
+                        <th class="admin-actions-header" id="actions-header">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tracker-table-body">
+                    <!-- Entries will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Create/Edit Entry Modal -->
+    <div id="entry-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="entry-modal-title">Create New Entry</h2>
+            </div>
+            <form id="entry-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="entry-hotel">Hotel Name *</label>
+                        <select id="entry-hotel" required>
+                            <option value="">Select hotel...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="entry-management-company">Management Company *</label>
+                        <select id="entry-management-company" required>
+                            <option value="">Select company...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="entry-date">Date Reported *</label>
+                        <input type="date" id="entry-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="entry-type">Type *</label>
+                        <select id="entry-type" required>
+                            <option value="">Select type...</option>
+                            <option value="Issue">Issue</option>
+                            <option value="Tactic">Tactic</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="entry-current">Current Status *</label>
+                    <select id="entry-current" required>
+                        <option value="true">Yes - Current</option>
+                        <option value="false">No - Not Current</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="entry-description-short">Description Short *</label>
+                    <input type="text" id="entry-description-short" required placeholder="Brief description...">
+                </div>
+                <div class="form-group">
+                    <label for="entry-description-long">Description Long</label>
+                    <textarea id="entry-description-long" placeholder="Detailed description (optional)..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-entry-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-entry-btn">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-entry-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Delete Entry</h2>
+            </div>
+            <p>Are you sure you want to delete this entry? This action cannot be undone.</p>
+            <p style="margin-top: 1rem;"><strong id="delete-entry-name"></strong></p>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancel-delete-btn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-delete-btn" style="background: #dc2626;">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Lists Modal -->
+    <div id="manage-lists-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Hotels & Management Companies</h2>
+            </div>
+
+            <!-- Hotels Section -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Hotels</h3>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="text" id="new-hotel-name" placeholder="New hotel name..." style="flex: 1; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <button id="add-hotel-btn" class="btn btn-primary">Add Hotel</button>
+                </div>
+                <div id="hotels-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.5rem;">
+                    <!-- Hotels will be populated here -->
+                </div>
+            </div>
+
+            <!-- Management Companies Section -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Management Companies</h3>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                    <input type="text" id="new-company-name" placeholder="New company name..." style="flex: 1; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                    <button id="add-company-btn" class="btn btn-primary">Add Company</button>
+                </div>
+                <div id="companies-list" style="max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.5rem;">
+                    <!-- Companies will be populated here -->
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-primary" id="close-manage-lists-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="change-password-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+            </div>
+            <form id="change-password-form">
+                <div class="form-group">
+                    <label for="new-password">New Password *</label>
+                    <input type="password" id="new-password" required minlength="6" placeholder="Enter new password">
+                    <small style="color: #6b7280; font-size: 0.875rem;">Minimum 6 characters</small>
+                </div>
+                <div class="form-group">
+                    <label for="confirm-password">Confirm New Password *</label>
+                    <input type="password" id="confirm-password" required minlength="6" placeholder="Confirm new password">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" id="cancel-password-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="js/supabase-config.js"></script>
+    <script type="module" src="js/hotel-tracker.js"></script>
+    <script type="module" src="js/change-password.js"></script>
+</body>
+</html>
