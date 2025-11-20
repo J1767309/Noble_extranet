@@ -2,6 +2,24 @@ import { supabase } from './supabase-config.js';
 
 let currentUser = null;
 
+// Update form labels based on report type
+function updateFormLabels() {
+    const reportType = document.getElementById('report-type').value;
+    const descriptionHelp = document.getElementById('description-help');
+    const submitBtn = document.getElementById('submit-btn');
+
+    if (reportType === 'feature') {
+        descriptionHelp.textContent = 'Describe the feature you would like to see, why it would be useful, and how it should work';
+        submitBtn.textContent = 'Submit Feature Request';
+    } else {
+        descriptionHelp.textContent = 'Include steps to reproduce, expected behavior, and actual behavior';
+        submitBtn.textContent = 'Submit Bug Report';
+    }
+}
+
+// Listen for type changes
+document.getElementById('report-type').addEventListener('change', updateFormLabels);
+
 // Check authentication state and load user data
 async function loadUserData() {
     const { data: { session } } = await supabase.auth.getSession();
@@ -85,7 +103,7 @@ async function loadMyReports(userId) {
                         <line x1="12" y1="8" x2="12" y2="12"></line>
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
-                    <p>You haven't submitted any bug reports yet.</p>
+                    <p>You haven't submitted any reports yet.</p>
                 </div>
             `;
             return;
@@ -100,12 +118,15 @@ async function loadMyReports(userId) {
 
             const statusLabel = report.status.replace('_', ' ');
             const priorityLabel = report.priority.charAt(0).toUpperCase() + report.priority.slice(1);
+            const typeLabel = report.type === 'feature' ? 'Feature' : 'Bug';
+            const typeClass = report.type === 'feature' ? 'type-feature' : 'type-bug';
 
             return `
                 <div class="report-item">
                     <div class="report-header">
                         <h3 class="report-title">${escapeHtml(report.title)}</h3>
                         <div class="report-badges">
+                            <span class="badge ${typeClass}">${typeLabel}</span>
                             <span class="badge status-${report.status}">${statusLabel}</span>
                             <span class="badge priority-${report.priority}">${priorityLabel}</span>
                         </div>
@@ -136,10 +157,11 @@ document.getElementById('bug-report-form').addEventListener('submit', async (e) 
 
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-        alert('You must be logged in to submit a bug report');
+        alert('You must be logged in to submit a report');
         return;
     }
 
+    const reportType = document.getElementById('report-type').value;
     const title = document.getElementById('bug-title').value.trim();
     const description = document.getElementById('bug-description').value.trim();
     const pageUrl = document.getElementById('bug-page').value.trim();
@@ -155,6 +177,7 @@ document.getElementById('bug-report-form').addEventListener('submit', async (e) 
         const { data, error } = await supabase
             .from('bug_reports')
             .insert([{
+                type: reportType,
                 title: title,
                 description: description,
                 page_url: pageUrl || null,
@@ -183,8 +206,8 @@ document.getElementById('bug-report-form').addEventListener('submit', async (e) 
         // Scroll to reports section
         document.getElementById('my-reports-list').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (error) {
-        console.error('Error submitting bug report:', error);
-        alert('Error submitting bug report: ' + error.message);
+        console.error('Error submitting report:', error);
+        alert('Error submitting report: ' + error.message);
     }
 });
 

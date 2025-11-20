@@ -943,8 +943,8 @@ select {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     background: #2c2c2c;
     border-radius: 50%;
     display: flex;
@@ -959,8 +959,8 @@ select {
 
 .floating-bug-btn svg {
     color: white;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
 }
 
 .floating-bug-btn:hover {

@@ -142,6 +142,7 @@ function updateStats() {
 // Render reports table
 function renderReports() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
+    const typeFilter = document.getElementById('filter-type').value;
     const statusFilter = document.getElementById('filter-status').value;
     const priorityFilter = document.getElementById('filter-priority').value;
     const reporterFilter = document.getElementById('filter-reporter').value;
@@ -152,11 +153,12 @@ function renderReports() {
             report.description.toLowerCase().includes(searchTerm) ||
             (report.page_url && report.page_url.toLowerCase().includes(searchTerm));
 
+        const matchesType = !typeFilter || report.type === typeFilter;
         const matchesStatus = !statusFilter || report.status === statusFilter;
         const matchesPriority = !priorityFilter || report.priority === priorityFilter;
         const matchesReporter = !reporterFilter || report.reported_by === reporterFilter;
 
-        return matchesSearch && matchesStatus && matchesPriority && matchesReporter;
+        return matchesSearch && matchesType && matchesStatus && matchesPriority && matchesReporter;
     });
 
     const tbody = document.getElementById('reports-table-body');
@@ -164,13 +166,13 @@ function renderReports() {
     if (filteredReports.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="empty-state">
+                <td colspan="8" class="empty-state">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="8" x2="12" y2="12"></line>
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
-                    <p>No bug reports found.</p>
+                    <p>No reports found.</p>
                 </td>
             </tr>
         `;
@@ -189,6 +191,8 @@ function renderReports() {
 
         const statusLabel = report.status.replace('_', ' ');
         const priorityLabel = report.priority.charAt(0).toUpperCase() + report.priority.slice(1);
+        const typeLabel = report.type === 'feature' ? 'Feature' : 'Bug';
+        const typeClass = report.type === 'feature' ? 'type-feature' : 'type-bug';
 
         return `
             <tr data-report-id="${report.id}">
@@ -200,6 +204,7 @@ function renderReports() {
                         </div>
                     </div>
                 </td>
+                <td><span class="badge ${typeClass}">${typeLabel}</span></td>
                 <td><span class="badge status-${report.status}">${statusLabel}</span></td>
                 <td><span class="badge priority-${report.priority}">${priorityLabel}</span></td>
                 <td>${escapeHtml(reporterName)}</td>
@@ -356,6 +361,7 @@ document.querySelectorAll('.modal').forEach(modal => {
 
 // Filter changes
 document.getElementById('search-input').addEventListener('input', renderReports);
+document.getElementById('filter-type').addEventListener('change', renderReports);
 document.getElementById('filter-status').addEventListener('change', renderReports);
 document.getElementById('filter-priority').addEventListener('change', renderReports);
 document.getElementById('filter-reporter').addEventListener('change', renderReports);

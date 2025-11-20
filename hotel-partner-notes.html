@@ -3,90 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotel Top Accounts - Noble</title>
+    <title>Hotel Partner Notes - Noble</title>
     <link rel="stylesheet" href="css/styles.css">
     <!-- Quill Rich Text Editor -->
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
     <style>
-        .accounts-table-container {
+        .notes-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .notes-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .note-card {
             background: white;
             border-radius: 8px;
             padding: 1.5rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            overflow-x: auto;
+            transition: all 0.2s;
         }
 
-        .accounts-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
+        .note-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
-        .accounts-table thead {
-            background: #f9fafb;
+        .note-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
         }
 
-        .accounts-table th {
-            padding: 0.875rem;
-            text-align: left;
+        .note-card-title {
+            flex: 1;
+        }
+
+        .note-card-title h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #111827;
+        }
+
+        .note-card-meta {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .note-card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .note-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .note-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .note-section-title {
             font-weight: 600;
             color: #374151;
-            border-bottom: 2px solid #e5e7eb;
-            white-space: nowrap;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
         }
 
-        .accounts-table td {
-            padding: 0.875rem;
-            border-bottom: 1px solid #e5e7eb;
-            vertical-align: top;
-        }
-
-        .accounts-table tbody tr:hover {
-            background: #f9fafb;
-        }
-
-        .account-type-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .type-top {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .type-target {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 12px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .status-active {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-inactive {
-            background: #f3f4f6;
+        .note-section-content {
             color: #6b7280;
+            line-height: 1.6;
         }
 
-        .status-lost {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .status-pending {
-            background: #fef3c7;
-            color: #92400e;
+        .note-section-content:empty::before {
+            content: "No content";
+            color: #d1d5db;
+            font-style: italic;
         }
 
         .search-section {
@@ -99,7 +96,7 @@
 
         .search-filters {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 2fr 1fr 1fr;
             gap: 1rem;
             align-items: end;
         }
@@ -130,37 +127,6 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        .account-actions {
-            display: flex;
-            gap: 0.5rem;
-            white-space: nowrap;
-        }
-
-        .btn-icon {
-            padding: 0.5rem;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            background: #f3f4f6;
-            color: #374151;
-            transition: all 0.2s;
-            font-size: 0.875rem;
-        }
-
-        .btn-icon:hover {
-            background: #e5e7eb;
-        }
-
-        .btn-icon.btn-edit:hover {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .btn-icon.btn-delete:hover {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
         .modal {
             display: none;
             position: fixed;
@@ -182,7 +148,7 @@
             background: white;
             border-radius: 8px;
             width: 90%;
-            max-width: 600px;
+            max-width: 1000px;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -191,6 +157,10 @@
         .modal-header {
             padding: 1.5rem;
             border-bottom: 1px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
         }
 
         .modal-header h2 {
@@ -232,9 +202,10 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        .form-group textarea {
-            resize: vertical;
-            min-height: 100px;
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
         }
 
         /* Quill Editor Styles */
@@ -273,63 +244,53 @@
             font-style: normal;
         }
 
-        /* Rich text display in table */
-        .rich-text-display {
-            max-width: 400px;
-        }
-
-        .rich-text-display p {
-            margin: 0.5em 0;
-        }
-
-        .rich-text-display ul, .rich-text-display ol {
-            margin: 0.5em 0;
-            padding-left: 1.5em;
-        }
-
-        .rich-text-display strong {
-            font-weight: 600;
-        }
-
         .modal-actions {
             display: flex;
             justify-content: flex-end;
             gap: 1rem;
             padding: 1.5rem;
             border-top: 1px solid #e5e7eb;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .stats-summary {
+            position: sticky;
+            bottom: 0;
             background: white;
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 1.5rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
         }
 
-        .stat-card {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #111827;
-        }
-
-        .stat-label {
+        .btn-icon {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: #f3f4f6;
+            color: #374151;
+            transition: all 0.2s;
             font-size: 0.875rem;
+        }
+
+        .btn-icon:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-icon.btn-edit:hover {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .btn-icon.btn-delete:hover {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
             color: #6b7280;
-            margin-top: 0.25rem;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            color: #d1d5db;
         }
 
         /* Responsive */
@@ -340,6 +301,15 @@
 
             .form-row {
                 grid-template-columns: 1fr;
+            }
+
+            .note-card-header {
+                flex-direction: column;
+            }
+
+            .note-card-actions {
+                margin-top: 1rem;
+                width: 100%;
             }
         }
     </style>
@@ -386,7 +356,7 @@
                 </svg>
                 <span>Hotel Tracker</span>
             </a>
-            <a href="hotel-top-accounts.html" class="sidebar-link active" id="hotel-top-accounts-link" style="display: none;">
+            <a href="hotel-top-accounts.html" class="sidebar-link" id="hotel-top-accounts-link" style="display: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                     <circle cx="8.5" cy="7" r="4"></circle>
@@ -395,7 +365,7 @@
                 </svg>
                 <span>Hotel Top Accounts</span>
             </a>
-            <a href="hotel-partner-notes.html" class="sidebar-link" id="hotel-partner-notes-link" style="display: none;">
+            <a href="hotel-partner-notes.html" class="sidebar-link active" id="hotel-partner-notes-link" style="display: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
@@ -441,37 +411,17 @@
     <main class="main-content">
         <div class="page-header">
             <div>
-                <h1>Hotel Top Accounts</h1>
-                <p class="subtitle">Manage top performing accounts and target accounts by hotel</p>
+                <h1>Hotel Partner Notes</h1>
+                <p class="subtitle">Mid-year review notes and key updates by hotel</p>
             </div>
             <div class="page-header-actions">
-                <button id="create-account-btn" class="btn btn-primary" style="display: none;">
+                <button id="create-note-btn" class="btn btn-primary" style="display: none;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    New Account
+                    New Partner Note
                 </button>
-            </div>
-        </div>
-
-        <!-- Stats Summary -->
-        <div class="stats-summary" id="stats-summary">
-            <div class="stat-card">
-                <div class="stat-value" id="stat-total">0</div>
-                <div class="stat-label">Total Accounts</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="stat-top">0</div>
-                <div class="stat-label">Top Accounts</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="stat-target">0</div>
-                <div class="stat-label">Target Accounts</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="stat-hotels">0</div>
-                <div class="stat-label">Hotels</div>
             </div>
         </div>
 
@@ -480,7 +430,7 @@
             <div class="search-filters">
                 <div class="filter-group">
                     <label for="search-input">Search</label>
-                    <input type="text" id="search-input" class="search-input" placeholder="Search accounts...">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search hotels or notes...">
                 </div>
                 <div class="filter-group">
                     <label for="filter-hotel">Hotel</label>
@@ -489,128 +439,100 @@
                     </select>
                 </div>
                 <div class="filter-group">
-                    <label for="filter-type">Account Type</label>
-                    <select id="filter-type" class="filter-select">
-                        <option value="">All Types</option>
-                        <option value="Top">Top</option>
-                        <option value="Target">Target</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="filter-status">Status</label>
-                    <select id="filter-status" class="filter-select">
-                        <option value="">All Statuses</option>
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                        <option value="Lost">Lost</option>
-                        <option value="Pending">Pending</option>
+                    <label for="filter-period">Review Period</label>
+                    <select id="filter-period" class="filter-select">
+                        <option value="">All Periods</option>
                     </select>
                 </div>
             </div>
         </div>
 
-        <!-- Accounts Table -->
-        <div class="accounts-table-container">
-            <table class="accounts-table">
-                <thead>
-                    <tr>
-                        <th>Hotel</th>
-                        <th>Account Name</th>
-                        <th>Type</th>
-                        <th>RNs 2025</th>
-                        <th>ADR 2025</th>
-                        <th>RNs Forecast 2026</th>
-                        <th>ADR 2026</th>
-                        <th>Segment</th>
-                        <th>Status</th>
-                        <th>Description Long</th>
-                        <th>Last Updated</th>
-                        <th id="actions-header" style="display: none;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="accounts-table-body">
-                    <!-- Populated by JavaScript -->
-                </tbody>
-            </table>
+        <!-- Notes Grid -->
+        <div class="notes-container">
+            <div class="notes-grid" id="notes-grid">
+                <!-- Populated by JavaScript -->
+            </div>
         </div>
     </main>
 
-    <!-- Create/Edit Account Modal -->
-    <div id="account-modal" class="modal">
+    <!-- Create/Edit Note Modal -->
+    <div id="note-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title">New Account</h2>
+                <h2 id="modal-title">New Partner Note</h2>
             </div>
-            <form id="account-form">
+            <form id="note-form">
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="account-hotel">Hotel *</label>
-                        <input type="text" id="account-hotel" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="account-name">Account Name *</label>
-                        <input type="text" id="account-name" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="account-type">Account Type *</label>
-                        <select id="account-type" required>
-                            <option value="">Select type...</option>
-                            <option value="Top">Top</option>
-                            <option value="Target">Target</option>
-                        </select>
-                    </div>
-
-                    <div id="top-account-fields" style="display: none;">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="rns-sold-2025">Room Nights Sold 2025</label>
-                                <input type="number" id="rns-sold-2025" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="adr-2025">ADR 2025 ($)</label>
-                                <input type="number" id="adr-2025" min="0" step="0.01">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="rns-forecasted-2026">Room Nights Forecast 2026</label>
-                                <input type="number" id="rns-forecasted-2026" min="0">
-                            </div>
-                            <div class="form-group">
-                                <label for="adr-2026">ADR 2026 ($)</label>
-                                <input type="number" id="adr-2026" min="0" step="0.01">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="target-account-fields" style="display: none;">
+                    <div class="form-row">
                         <div class="form-group">
-                            <label for="segment-type">Segment Type</label>
-                            <input type="text" id="segment-type" placeholder="e.g., LNR, Group, Group/LNR">
+                            <label for="note-hotel">Hotel Name *</label>
+                            <input type="text" id="note-hotel" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="note-period">Review Period</label>
+                            <input type="text" id="note-period" placeholder="e.g., 2025 Mid-Year">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="account-status">Status *</label>
-                        <select id="account-status" required>
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
-                            <option value="Lost">Lost</option>
-                            <option value="Pending">Pending</option>
-                        </select>
+                        <label for="note-review-date">Review Date</label>
+                        <input type="date" id="note-review-date">
                     </div>
 
                     <div class="form-group">
-                        <label for="account-description">Description Long</label>
-                        <div id="description-editor-container" class="quill-editor-container"></div>
+                        <label for="keys-to-success">Keys to Success</label>
+                        <div id="keys-to-success-editor" class="quill-editor-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-supply">New Supply</label>
+                        <div id="new-supply-editor" class="quill-editor-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="market-updates">Market Updates</label>
+                        <div id="market-updates-editor" class="quill-editor-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="str-revenue-market">STR/Revenue - Market</label>
+                        <div id="str-revenue-market-editor" class="quill-editor-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="str-revenue-hotel">STR/Revenue - Hotel</label>
+                        <div id="str-revenue-hotel-editor" class="quill-editor-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="accounts-top">Accounts - Top</label>
+                        <div id="accounts-top-editor" class="quill-editor-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="accounts-target">Accounts - Target</label>
+                        <div id="accounts-target-editor" class="quill-editor-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="expense-gop">Expense/GOP Update</label>
+                        <div id="expense-gop-editor" class="quill-editor-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="capital">Capital</label>
+                        <div id="capital-editor" class="quill-editor-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Additional Notes</label>
+                        <div id="notes-editor" class="quill-editor-container"></div>
                     </div>
                 </div>
 
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Account</button>
+                    <button type="submit" class="btn btn-primary">Save Partner Note</button>
                 </div>
             </form>
         </div>
@@ -623,7 +545,7 @@
                 <h2>Confirm Delete</h2>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete this account? This action cannot be undone.</p>
+                <p>Are you sure you want to delete this partner note? This action cannot be undone.</p>
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn btn-secondary" id="cancel-delete-btn">Cancel</button>
@@ -644,7 +566,7 @@
     <!-- Quill Rich Text Editor -->
     <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
     <script type="module" src="js/supabase-config.js"></script>
-    <script type="module" src="js/hotel-top-accounts.js"></script>
+    <script type="module" src="js/hotel-partner-notes.js"></script>
     <script type="module" src="js/change-password.js"></script>
 </body>
 </html>

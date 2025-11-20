@@ -34,6 +34,7 @@ async function initPage() {
     // Show internal links
     document.getElementById('hotel-tracker-link').style.display = 'flex';
     document.getElementById('hotel-top-accounts-link').style.display = 'flex';
+    document.getElementById('hotel-partner-notes-link').style.display = 'flex';
     document.getElementById('initiatives-link').style.display = 'flex';
     document.getElementById('bi-tools-link').style.display = 'flex';
 

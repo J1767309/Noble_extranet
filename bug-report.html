@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Report a Bug - Noble</title>
+    <title>Report Bug or Feature - Noble</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
         .bug-report-container {
@@ -224,6 +224,16 @@
             color: #991b1b;
         }
 
+        .type-bug {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .type-feature {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
         .report-description {
             color: #6b7280;
             margin: 0.5rem 0;
@@ -364,7 +374,7 @@
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
                     <path d="m9 12 2 2 4-4"></path>
                 </svg>
-                <span>Manage Bug Reports</span>
+                <span>Manage Reports</span>
             </a>
             <a href="user-management.html" class="sidebar-link" id="user-management-link" style="display: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -383,32 +393,43 @@
         <div class="bug-report-container">
             <div class="page-header">
                 <div>
-                    <h1>Report a Bug or Issue</h1>
-                    <p class="subtitle">Help us improve the system by reporting any bugs or issues you encounter</p>
+                    <h1>Report Bug or Feature Request</h1>
+                    <p class="subtitle">Help us improve the system by reporting bugs or suggesting new features</p>
                 </div>
             </div>
 
             <!-- Bug Report Form -->
             <div class="report-card">
                 <div id="success-message" class="success-message">
-                    Bug report submitted successfully! Thank you for helping us improve the system.
+                    Report submitted successfully! Thank you for helping us improve the system.
                 </div>
 
                 <form id="bug-report-form">
                     <div class="form-group">
-                        <label for="bug-title">
-                            Issue Title <span class="required">*</span>
+                        <label for="report-type">
+                            Type <span class="required">*</span>
                         </label>
-                        <input type="text" id="bug-title" required placeholder="Brief description of the issue">
-                        <div class="form-help">Provide a short, clear title for the issue</div>
+                        <select id="report-type" required>
+                            <option value="bug">Bug Report</option>
+                            <option value="feature">Feature Request</option>
+                        </select>
+                        <div class="form-help">Is this a bug or a feature request?</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bug-title">
+                            Title <span class="required">*</span>
+                        </label>
+                        <input type="text" id="bug-title" required placeholder="Brief description">
+                        <div class="form-help">Provide a short, clear title</div>
                     </div>
 
                     <div class="form-group">
                         <label for="bug-description">
                             Detailed Description <span class="required">*</span>
                         </label>
-                        <textarea id="bug-description" required placeholder="Describe what happened, what you expected to happen, and steps to reproduce the issue..."></textarea>
-                        <div class="form-help">Include steps to reproduce, expected behavior, and actual behavior</div>
+                        <textarea id="bug-description" required placeholder="Describe in detail..."></textarea>
+                        <div class="form-help" id="description-help">Include steps to reproduce, expected behavior, and actual behavior</div>
                     </div>
 
                     <div class="form-group">
@@ -459,7 +480,7 @@
 
                     <div class="submit-section">
                         <button type="button" class="btn btn-secondary" id="reset-form-btn">Clear Form</button>
-                        <button type="submit" class="btn btn-primary">Submit Bug Report</button>
+                        <button type="submit" class="btn btn-primary" id="submit-btn">Submit Report</button>
                     </div>
                 </form>
             </div>
