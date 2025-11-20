@@ -479,6 +479,201 @@
             height: 18px;
             cursor: pointer;
         }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .page-header-actions {
+                width: 100%;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .page-header-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Stats dashboard - already responsive */
+            .stats-dashboard {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 0.75rem;
+            }
+
+            .stat-card {
+                padding: 0.875rem;
+            }
+
+            /* Department sections */
+            .department-section {
+                padding: 1rem;
+            }
+
+            .department-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            /* Hide table headers on mobile */
+            .tasks-table thead {
+                display: none;
+            }
+
+            /* Display table as block */
+            .tasks-table,
+            .tasks-table tbody {
+                display: block;
+                width: 100%;
+            }
+
+            /* Display each row as a card */
+            .tasks-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                padding: 1rem;
+                background: white;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+
+            .tasks-table tr:hover {
+                background: white;
+            }
+
+            /* Display each cell as a row within the card */
+            .tasks-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding: 0.5rem 0;
+                border-bottom: 1px solid #f3f4f6;
+                white-space: normal !important;
+            }
+
+            .tasks-table td:last-child {
+                border-bottom: none;
+            }
+
+            /* Add labels before each cell */
+            .tasks-table td:nth-child(1):before {
+                content: "Task:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 90px;
+                flex-shrink: 0;
+            }
+
+            .tasks-table td:nth-child(2):before {
+                content: "Status:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 90px;
+                flex-shrink: 0;
+            }
+
+            .tasks-table td:nth-child(3):before {
+                content: "Target Date:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 90px;
+                flex-shrink: 0;
+            }
+
+            .tasks-table td:nth-child(4):before {
+                content: "Responsible:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 90px;
+                flex-shrink: 0;
+            }
+
+            .tasks-table td:nth-child(5):before {
+                content: "Steps Done:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 90px;
+                flex-shrink: 0;
+            }
+
+            .tasks-table td:nth-child(6):before {
+                content: "Tag:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 90px;
+                flex-shrink: 0;
+            }
+
+            .tasks-table td:nth-child(7):before {
+                content: "Actions:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 90px;
+                flex-shrink: 0;
+            }
+
+            /* Make action buttons more tappable */
+            .task-actions {
+                flex-wrap: wrap;
+            }
+
+            .btn-icon {
+                padding: 0.625rem;
+                min-width: 40px;
+                min-height: 40px;
+            }
+
+            /* Adjust modal forms */
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-group {
+                width: 100%;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .department-section {
+                padding: 0.75rem;
+            }
+
+            .tasks-table tr {
+                padding: 0.75rem;
+            }
+
+            .tasks-table td {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .tasks-table td:before {
+                margin-bottom: 0.25rem;
+                margin-right: 0;
+            }
+
+            .stat-card {
+                padding: 0.75rem;
+            }
+
+            .department-title {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body class="has-sidebar">

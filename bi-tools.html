@@ -244,6 +244,146 @@
         .admin-actions-header.show {
             display: table-cell;
         }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            .tools-table-container {
+                padding: 1rem;
+            }
+
+            /* Hide table headers on mobile */
+            .tools-table thead {
+                display: none;
+            }
+
+            /* Display table as block */
+            .tools-table,
+            .tools-table tbody {
+                display: block;
+                width: 100%;
+            }
+
+            /* Display each row as a card */
+            .tools-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                padding: 1rem;
+                background: white;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+
+            .tools-table tr:hover {
+                background: white;
+            }
+
+            /* Display each cell as a row within the card */
+            .tools-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding: 0.5rem 0;
+                border-bottom: 1px solid #f3f4f6;
+                white-space: normal !important;
+            }
+
+            .tools-table td:last-child {
+                border-bottom: none;
+            }
+
+            /* Add labels before each cell */
+            .tools-table td:nth-child(1):before {
+                content: "#:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 80px;
+            }
+
+            .tools-table td:nth-child(2):before {
+                content: "Report:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 80px;
+            }
+
+            .tools-table td:nth-child(3):before {
+                content: "Description:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 80px;
+            }
+
+            .tools-table td:nth-child(4):before {
+                content: "Frequency:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 80px;
+            }
+
+            .tools-table td:nth-child(5):before {
+                content: "Location:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 80px;
+            }
+
+            .tools-table td:nth-child(6):before {
+                content: "Actions:";
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 80px;
+            }
+
+            /* Make actions buttons more tappable */
+            .tool-actions {
+                flex-wrap: wrap;
+            }
+
+            .btn-icon {
+                padding: 0.625rem;
+                min-width: 40px;
+                min-height: 40px;
+            }
+
+            /* Page header adjustments */
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .page-header .btn {
+                width: 100%;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .tools-table-container {
+                padding: 0.75rem;
+            }
+
+            .tools-table tr {
+                padding: 0.75rem;
+            }
+
+            .tools-table td {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .tools-table td:before {
+                margin-bottom: 0.25rem;
+                margin-right: 0;
+            }
+        }
     </style>
 </head>
 <body class="has-sidebar">

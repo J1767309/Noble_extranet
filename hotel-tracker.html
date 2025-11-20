@@ -457,6 +457,204 @@
             .search-filters {
                 grid-template-columns: 1fr;
             }
+
+            /* Mobile-friendly table styles */
+            .tracker-table-container {
+                padding: 1rem;
+            }
+
+            .tracker-table-container h2 {
+                font-size: 1.125rem !important;
+            }
+
+            /* Hide table headers on mobile */
+            .tracker-table thead {
+                display: none;
+            }
+
+            /* Display table body as block */
+            .tracker-table,
+            .tracker-table tbody {
+                display: block;
+                width: 100%;
+            }
+
+            /* Display each row as a card */
+            .tracker-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                padding: 1rem;
+                background: white;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+
+            .tracker-table tr:hover {
+                background: white;
+            }
+
+            /* Display each cell as a row within the card */
+            .tracker-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                padding: 0.5rem 0;
+                border-bottom: 1px solid #f3f4f6;
+                width: 100% !important;
+                max-width: 100% !important;
+                white-space: normal !important;
+            }
+
+            .tracker-table td:last-child {
+                border-bottom: none;
+            }
+
+            /* Add labels before each cell */
+            .tracker-table td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #374151;
+                margin-right: 1rem;
+                min-width: 100px;
+                flex-shrink: 0;
+            }
+
+            /* Hotel tracker specific - 9 columns */
+            #hotel-tracker-table-body td:nth-child(1):before {
+                content: "Hotel:";
+            }
+
+            #hotel-tracker-table-body td:nth-child(2):before {
+                content: "Company:";
+            }
+
+            #hotel-tracker-table-body td:nth-child(3):before {
+                content: "Date:";
+            }
+
+            #hotel-tracker-table-body td:nth-child(4):before {
+                content: "Current:";
+            }
+
+            #hotel-tracker-table-body td:nth-child(5):before {
+                content: "Type:";
+            }
+
+            #hotel-tracker-table-body td:nth-child(6):before {
+                content: "Impact:";
+            }
+
+            #hotel-tracker-table-body td:nth-child(7):before {
+                content: "Summary:";
+            }
+
+            #hotel-tracker-table-body td:nth-child(8):before {
+                content: "Details:";
+            }
+
+            #hotel-tracker-table-body td:nth-child(9):before {
+                content: "Actions:";
+            }
+
+            /* Management tracker specific - 7 columns */
+            #management-tracker-table-body td:nth-child(1):before {
+                content: "Company:";
+            }
+
+            #management-tracker-table-body td:nth-child(2):before {
+                content: "Date:";
+            }
+
+            #management-tracker-table-body td:nth-child(3):before {
+                content: "Current:";
+            }
+
+            #management-tracker-table-body td:nth-child(4):before {
+                content: "Type:";
+            }
+
+            #management-tracker-table-body td:nth-child(5):before {
+                content: "Summary:";
+            }
+
+            #management-tracker-table-body td:nth-child(6):before {
+                content: "Details:";
+            }
+
+            #management-tracker-table-body td:nth-child(7):before {
+                content: "Actions:";
+            }
+
+            /* Make inline selects full width on mobile */
+            .inline-select {
+                min-width: 100px;
+                font-size: 0.875rem;
+            }
+
+            /* Ensure badges wrap properly */
+            .type-badge,
+            .current-badge,
+            .impact-badge {
+                white-space: nowrap;
+            }
+
+            /* Actions column */
+            .tracker-actions {
+                justify-content: flex-start !important;
+                gap: 0.5rem;
+            }
+
+            /* Make buttons more tappable on mobile */
+            .btn-icon {
+                padding: 0.625rem;
+                min-width: 40px;
+                min-height: 40px;
+            }
+
+            /* Page header adjustments */
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .page-header-actions {
+                width: 100%;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .page-header-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .tracker-table-container {
+                padding: 0.75rem;
+            }
+
+            .tracker-table tr {
+                padding: 0.75rem;
+            }
+
+            .tracker-table td {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .tracker-table td:before {
+                margin-bottom: 0.25rem;
+                margin-right: 0;
+            }
+
+            .inline-select {
+                width: 100%;
+                max-width: none;
+            }
         }
     </style>
 </head>
