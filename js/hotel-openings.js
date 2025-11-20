@@ -29,17 +29,23 @@ async function init() {
             currentUser = userData;
             document.getElementById('user-email').textContent = userEmail;
 
-            // Show User Management link for admins
+            // Show User Management and Bug Management link for admins
             if (userData.role === 'admin') {
                 const userMgmtLink = document.getElementById('user-management-link');
+                const bugMgmtLink = document.getElementById('bug-management-link');
                 if (userMgmtLink) userMgmtLink.style.display = 'flex';
+                if (bugMgmtLink) bugMgmtLink.style.display = 'flex';
             }
 
-            // Show Hotel Tracker and BI Tools link for internal users
+            // Show Hotel Tracker, Hotel Top Accounts, Initiatives, and BI Tools link for internal users
             if (userData.user_type === 'internal') {
                 const hotelTrackerLink = document.getElementById('hotel-tracker-link');
+                const hotelTopAccountsLink = document.getElementById('hotel-top-accounts-link');
+                const initiativesLink = document.getElementById('initiatives-link');
                 const biToolsLink = document.getElementById('bi-tools-link');
                 if (hotelTrackerLink) hotelTrackerLink.style.display = 'flex';
+                if (hotelTopAccountsLink) hotelTopAccountsLink.style.display = 'flex';
+                if (initiativesLink) initiativesLink.style.display = 'flex';
                 if (biToolsLink) biToolsLink.style.display = 'flex';
             }
 
