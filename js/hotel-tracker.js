@@ -684,12 +684,20 @@ function displayHotelsList() {
         item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid #e5e7eb;';
         item.innerHTML = `
             <span>${hotel.name}</span>
-            <button class="btn-icon btn-delete" onclick="window.deleteHotel('${hotel.id}')" title="Delete">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-            </button>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn-icon btn-edit" onclick="window.editHotel('${hotel.id}', '${hotel.name.replace(/'/g, "\\'")}')" title="Edit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                </button>
+                <button class="btn-icon btn-delete" onclick="window.deleteHotel('${hotel.id}')" title="Delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
         `;
         list.appendChild(item);
     });
@@ -710,12 +718,20 @@ function displayCompaniesList() {
         item.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid #e5e7eb;';
         item.innerHTML = `
             <span>${company.name}</span>
-            <button class="btn-icon btn-delete" onclick="window.deleteCompany('${company.id}')" title="Delete">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-            </button>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn-icon btn-edit" onclick="window.editCompany('${company.id}', '${company.name.replace(/'/g, "\\'")}')" title="Edit">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                </button>
+                <button class="btn-icon btn-delete" onclick="window.deleteCompany('${company.id}')" title="Delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    </svg>
+                </button>
+            </div>
         `;
         list.appendChild(item);
     });
@@ -786,6 +802,78 @@ document.getElementById('add-company-btn').addEventListener('click', async () =>
         alert('Error adding company: ' + error.message);
     }
 });
+
+// Edit hotel function
+window.editHotel = async (hotelId, currentName) => {
+    const newName = prompt('Edit hotel name:', currentName);
+
+    if (!newName || newName.trim() === '') {
+        return;
+    }
+
+    if (newName.trim() === currentName) {
+        return; // No change
+    }
+
+    try {
+        const { error } = await supabase
+            .from('hotels')
+            .update({ name: newName.trim() })
+            .eq('id', hotelId);
+
+        if (error) {
+            if (error.code === '23505') {
+                alert('A hotel with this name already exists.');
+            } else {
+                throw error;
+            }
+            return;
+        }
+
+        await loadManageLists();
+        await loadEntries();
+        alert('Hotel name updated successfully!');
+    } catch (error) {
+        console.error('Error updating hotel:', error);
+        alert('Error updating hotel: ' + error.message);
+    }
+};
+
+// Edit company function
+window.editCompany = async (companyId, currentName) => {
+    const newName = prompt('Edit management company name:', currentName);
+
+    if (!newName || newName.trim() === '') {
+        return;
+    }
+
+    if (newName.trim() === currentName) {
+        return; // No change
+    }
+
+    try {
+        const { error } = await supabase
+            .from('management_companies')
+            .update({ name: newName.trim() })
+            .eq('id', companyId);
+
+        if (error) {
+            if (error.code === '23505') {
+                alert('A company with this name already exists.');
+            } else {
+                throw error;
+            }
+            return;
+        }
+
+        await loadManageLists();
+        await loadEntries();
+        alert('Company name updated successfully!');
+    } catch (error) {
+        console.error('Error updating company:', error);
+        alert('Error updating company: ' + error.message);
+    }
+};
 
 // Delete hotel function
 window.deleteHotel = async (hotelId) => {
