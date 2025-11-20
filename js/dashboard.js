@@ -32,12 +32,16 @@ async function loadUserData() {
             document.getElementById('welcome-message').textContent = `Welcome, ${userName}`;
             document.getElementById('user-email').textContent = userEmail;
 
-            // Show User Management link and card only for admins
+            // Show User Management and Bug Management link and card only for admins
             if (userData.role === 'admin') {
                 const userMgmtLink = document.getElementById('user-management-link');
                 const userMgmtCard = document.getElementById('user-management-card');
+                const bugMgmtLink = document.getElementById('bug-management-link');
+                const bugMgmtCard = document.getElementById('bug-management-card');
                 if (userMgmtLink) userMgmtLink.style.display = 'flex';
                 if (userMgmtCard) userMgmtCard.style.display = 'flex';
+                if (bugMgmtLink) bugMgmtLink.style.display = 'flex';
+                if (bugMgmtCard) bugMgmtCard.style.display = 'flex';
             }
 
             // Show Hotel Tracker, Hotel Top Accounts, Initiatives, and BI Tools link and card only for internal users

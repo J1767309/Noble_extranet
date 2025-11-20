@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report a Bug - Noble</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .bug-report-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .report-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .report-card h2 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #111827;
+            font-size: 1.5rem;
+        }
+
+        .report-card p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-group label .required {
+            color: #dc2626;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .form-help {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .priority-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .priority-option {
+            position: relative;
+        }
+
+        .priority-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .priority-label {
+            display: block;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .priority-option input[type="radio"]:checked + .priority-label {
+            border-color: #3b82f6;
+            background: #eff6ff;
+            color: #1e40af;
+        }
+
+        .priority-label:hover {
+            border-color: #9ca3af;
+        }
+
+        .submit-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .my-reports-section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .my-reports-section h2 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+
+        .reports-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .report-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 1rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .report-item:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.5rem;
+        }
+
+        .report-title {
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+
+        .report-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+            margin-left: 1rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .status-open {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-in_progress {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-resolved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-closed {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .status-wont_fix {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .priority-low {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .priority-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .priority-high {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .priority-critical {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .report-description {
+            color: #6b7280;
+            margin: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+
+        .report-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #9ca3af;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .report-card {
+                padding: 1.5rem;
+            }
+
+            .priority-options {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .submit-section {
+                flex-direction: column;
+            }
+
+            .report-header {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .report-badges {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="has-sidebar" data-page="bug-report">
+    <!-- Top Header -->
+    <header class="top-header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="images/noble-logo.png" alt="Noble Investment Group" class="logo-small">
+                <span class="nav-title">Noble</span>
+            </div>
+            <div class="header-actions">
+                <span id="user-email" class="user-info"></span>
+                <button id="change-password-btn" class="btn btn-secondary">Change Password</button>
+                <button id="logout-btn" class="btn btn-secondary">Sign Out</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+        <nav class="sidebar-nav">
+            <a href="dashboard.html" class="sidebar-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="hotel-openings.html" class="sidebar-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Hotel Openings</span>
+            </a>
+            <a href="hotel-tracker.html" class="sidebar-link" id="hotel-tracker-link" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Hotel Tracker</span>
+            </a>
+            <a href="hotel-top-accounts.html" class="sidebar-link" id="hotel-top-accounts-link" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="8.5" cy="7" r="4"></circle>
+                    <line x1="20" y1="8" x2="20" y2="14"></line>
+                    <line x1="23" y1="11" x2="17" y2="11"></line>
+                </svg>
+                <span>Hotel Top Accounts</span>
+            </a>
+            <a href="initiatives.html" class="sidebar-link" id="initiatives-link" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <span>Initiatives</span>
+            </a>
+            <a href="bi-tools.html" class="sidebar-link" id="bi-tools-link" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
+                <span>BI Tools</span>
+            </a>
+            <a href="bug-management.html" class="sidebar-link" id="bug-management-link" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                </svg>
+                <span>Manage Bug Reports</span>
+            </a>
+            <a href="user-management.html" class="sidebar-link" id="user-management-link" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span>User Management</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="bug-report-container">
+            <div class="page-header">
+                <div>
+                    <h1>Report a Bug or Issue</h1>
+                    <p class="subtitle">Help us improve the system by reporting any bugs or issues you encounter</p>
+                </div>
+            </div>
+
+            <!-- Bug Report Form -->
+            <div class="report-card">
+                <div id="success-message" class="success-message">
+                    Bug report submitted successfully! Thank you for helping us improve the system.
+                </div>
+
+                <form id="bug-report-form">
+                    <div class="form-group">
+                        <label for="bug-title">
+                            Issue Title <span class="required">*</span>
+                        </label>
+                        <input type="text" id="bug-title" required placeholder="Brief description of the issue">
+                        <div class="form-help">Provide a short, clear title for the issue</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bug-description">
+                            Detailed Description <span class="required">*</span>
+                        </label>
+                        <textarea id="bug-description" required placeholder="Describe what happened, what you expected to happen, and steps to reproduce the issue..."></textarea>
+                        <div class="form-help">Include steps to reproduce, expected behavior, and actual behavior</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bug-page">
+                            Page/Location
+                        </label>
+                        <input type="text" id="bug-page" placeholder="e.g., Hotel Tracker, Dashboard">
+                        <div class="form-help">Where did you encounter this issue?</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bug-browser">
+                            Browser
+                        </label>
+                        <select id="bug-browser">
+                            <option value="">Select browser...</option>
+                            <option value="Chrome">Chrome</option>
+                            <option value="Firefox">Firefox</option>
+                            <option value="Safari">Safari</option>
+                            <option value="Edge">Edge</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <div class="form-help">Which browser are you using?</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <div class="priority-options">
+                            <div class="priority-option">
+                                <input type="radio" id="priority-low" name="priority" value="low" checked>
+                                <label for="priority-low" class="priority-label">Low</label>
+                            </div>
+                            <div class="priority-option">
+                                <input type="radio" id="priority-medium" name="priority" value="medium">
+                                <label for="priority-medium" class="priority-label">Medium</label>
+                            </div>
+                            <div class="priority-option">
+                                <input type="radio" id="priority-high" name="priority" value="high">
+                                <label for="priority-high" class="priority-label">High</label>
+                            </div>
+                            <div class="priority-option">
+                                <input type="radio" id="priority-critical" name="priority" value="critical">
+                                <label for="priority-critical" class="priority-label">Critical</label>
+                            </div>
+                        </div>
+                        <div class="form-help">How severely does this issue affect your work?</div>
+                    </div>
+
+                    <div class="submit-section">
+                        <button type="button" class="btn btn-secondary" id="reset-form-btn">Clear Form</button>
+                        <button type="submit" class="btn btn-primary">Submit Bug Report</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- My Reports -->
+            <div class="my-reports-section">
+                <h2>My Submitted Reports</h2>
+                <div id="my-reports-list" class="reports-list">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module" src="js/supabase-config.js"></script>
+    <script type="module" src="js/bug-report.js"></script>
+    <script type="module" src="js/change-password.js"></script>
+</body>
+</html>

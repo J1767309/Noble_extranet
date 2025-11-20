@@ -937,3 +937,58 @@ select {
     line-height: 1.6;
     margin: 0;
 }
+
+/* Floating Bug Report Button */
+.floating-bug-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 56px;
+    height: 56px;
+    background: #2c2c2c;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 999;
+    text-decoration: none;
+}
+
+.floating-bug-btn svg {
+    color: white;
+    width: 24px;
+    height: 24px;
+}
+
+.floating-bug-btn:hover {
+    background: #1a1a1a;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+}
+
+.floating-bug-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Hide floating button on bug report page itself */
+body[data-page="bug-report"] .floating-bug-btn {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .floating-bug-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+    }
+
+    .floating-bug-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+}
