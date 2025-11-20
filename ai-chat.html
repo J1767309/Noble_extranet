@@ -155,6 +155,21 @@
             margin: 0 0 5px 0;
             font-size: 24px;
             color: #333;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .beta-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #FFA500;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .chat-description {
@@ -545,8 +560,11 @@
             <!-- Chat Area -->
             <div class="chat-main">
                 <div class="chat-header">
-                    <h1>AI Chat Assistant</h1>
-                    <p class="chat-description">Ask questions about any hotel in the Noble portfolio. I can help with partner notes, top accounts, initiatives, and more.</p>
+                    <h1>
+                        AI Chat Assistant
+                        <span class="beta-badge">Beta</span>
+                    </h1>
+                    <p class="chat-description">Ask questions about any hotel in the Noble portfolio. I can help with partner notes, top accounts, initiatives, and more. <strong>Note:</strong> This feature is in beta and responses may vary in accuracy.</p>
                 </div>
 
                 <div class="chat-options">
@@ -561,7 +579,7 @@
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                         </svg>
-                        <h2>Welcome to AI Chat</h2>
+                        <h2>Welcome to AI Chat <span style="color: #FFA500; font-size: 16px; font-weight: 600;">(BETA)</span></h2>
                         <p>Start a conversation by asking a question about any hotel in the Noble portfolio. Examples:</p>
                         <ul style="text-align: left; max-width: 500px; margin: 20px auto;">
                             <li>What are the keys to success for Renaissance Raleigh?</li>
@@ -569,6 +587,7 @@
                             <li>What are the top accounts for Hyatt House Raleigh?</li>
                             <li>Compare GOP performance across all hotels</li>
                         </ul>
+                        <p style="font-size: 13px; color: #999; margin-top: 20px;"><em>This feature is in beta. Responses are AI-generated and should be verified for accuracy.</em></p>
                     </div>
                 </div>
 
