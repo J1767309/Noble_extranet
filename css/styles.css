@@ -646,19 +646,20 @@ select {
 
     /* Hide table headers on mobile */
     .users-table thead {
-        display: none;
+        display: none !important;
     }
 
     /* Display table as block */
     .users-table,
     .users-table tbody {
-        display: block;
-        width: 100%;
+        display: block !important;
+        width: 100% !important;
+        border-collapse: separate !important;
     }
 
     /* Display each row as a card */
     .users-table tr {
-        display: block;
+        display: block !important;
         margin-bottom: 1rem;
         border: 1px solid #e5e7eb;
         border-radius: 8px;
@@ -669,11 +670,14 @@ select {
 
     /* Display each cell as a row within the card */
     .users-table td {
-        display: flex;
+        display: flex !important;
         justify-content: space-between;
         align-items: flex-start;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #f3f4f6;
+        padding: 0.5rem 0 !important;
+        border-bottom: 1px solid #f3f4f6 !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-top: none !important;
     }
 
     .users-table td:last-child {
