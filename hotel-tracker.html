@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotel Tracker - Noble</title>
+    <title>Hotel & Management Tracker - Noble</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
         .tracker-table-container {
@@ -39,53 +39,97 @@
             vertical-align: top;
         }
 
-        /* Column widths for better readability */
-        .tracker-table th:nth-child(1),
-        .tracker-table td:nth-child(1) {
+        /* Column widths for Hotel table */
+        #hotel-tracker-table-body th:nth-child(1),
+        #hotel-tracker-table-body td:nth-child(1) {
             width: 12%;
             max-width: 150px;
         }
 
-        .tracker-table th:nth-child(2),
-        .tracker-table td:nth-child(2) {
+        #hotel-tracker-table-body th:nth-child(2),
+        #hotel-tracker-table-body td:nth-child(2) {
             width: 10%;
             max-width: 120px;
         }
 
-        .tracker-table th:nth-child(3),
-        .tracker-table td:nth-child(3) {
+        #hotel-tracker-table-body th:nth-child(3),
+        #hotel-tracker-table-body td:nth-child(3) {
             width: 8%;
             white-space: nowrap;
         }
 
-        .tracker-table th:nth-child(4),
-        .tracker-table td:nth-child(4) {
+        #hotel-tracker-table-body th:nth-child(4),
+        #hotel-tracker-table-body td:nth-child(4) {
             width: 6%;
             white-space: nowrap;
         }
 
-        .tracker-table th:nth-child(5),
-        .tracker-table td:nth-child(5) {
+        #hotel-tracker-table-body th:nth-child(5),
+        #hotel-tracker-table-body td:nth-child(5) {
             width: 6%;
             white-space: nowrap;
         }
 
-        .tracker-table th:nth-child(6),
-        .tracker-table td:nth-child(6) {
+        #hotel-tracker-table-body th:nth-child(6),
+        #hotel-tracker-table-body td:nth-child(6) {
             width: 18%;
             word-wrap: break-word;
         }
 
-        .tracker-table th:nth-child(7),
-        .tracker-table td:nth-child(7) {
+        #hotel-tracker-table-body th:nth-child(7),
+        #hotel-tracker-table-body td:nth-child(7) {
             width: 35%;
             word-wrap: break-word;
             white-space: pre-wrap;
         }
 
-        .tracker-table th:nth-child(8),
-        .tracker-table td:nth-child(8) {
+        #hotel-tracker-table-body th:nth-child(8),
+        #hotel-tracker-table-body td:nth-child(8) {
             width: 5%;
+            white-space: nowrap;
+        }
+
+        /* Column widths for Management table (one less column) */
+        #management-tracker-table-body th:nth-child(1),
+        #management-tracker-table-body td:nth-child(1) {
+            width: 15%;
+            max-width: 180px;
+        }
+
+        #management-tracker-table-body th:nth-child(2),
+        #management-tracker-table-body td:nth-child(2) {
+            width: 10%;
+            white-space: nowrap;
+        }
+
+        #management-tracker-table-body th:nth-child(3),
+        #management-tracker-table-body td:nth-child(3) {
+            width: 8%;
+            white-space: nowrap;
+        }
+
+        #management-tracker-table-body th:nth-child(4),
+        #management-tracker-table-body td:nth-child(4) {
+            width: 8%;
+            white-space: nowrap;
+        }
+
+        #management-tracker-table-body th:nth-child(5),
+        #management-tracker-table-body td:nth-child(5) {
+            width: 20%;
+            word-wrap: break-word;
+        }
+
+        #management-tracker-table-body th:nth-child(6),
+        #management-tracker-table-body td:nth-child(6) {
+            width: 35%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        #management-tracker-table-body th:nth-child(7),
+        #management-tracker-table-body td:nth-child(7) {
+            width: 4%;
             white-space: nowrap;
         }
 
@@ -382,8 +426,8 @@
     <main class="main-content">
         <div class="page-header">
             <div>
-                <h1>Hotel Tracker</h1>
-                <p class="subtitle">Track hotel issues and tactics</p>
+                <h1>Hotel & Management Tracker</h1>
+                <p class="subtitle">Track hotel and management company issues and tactics</p>
             </div>
             <div class="page-header-actions">
                 <button id="manage-lists-btn" class="btn btn-secondary" style="display: none;">
@@ -408,7 +452,7 @@
             <div class="search-filters">
                 <div class="filter-group">
                     <label for="search-input">Search</label>
-                    <input type="text" id="search-input" class="search-input" placeholder="Search hotels, descriptions...">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search hotels, management companies, descriptions...">
                 </div>
                 <div class="filter-group">
                     <label for="filter-type">Type</label>
@@ -441,8 +485,30 @@
             </div>
         </div>
 
-        <!-- Tracker Table -->
+        <!-- Management Issues Table -->
         <div class="tracker-table-container">
+            <h2 style="margin: 0 0 1rem 0; font-size: 1.25rem; color: #1a1a1a;">Management Issues</h2>
+            <table class="tracker-table">
+                <thead>
+                    <tr>
+                        <th>Management Company</th>
+                        <th>Date Reported</th>
+                        <th>Current</th>
+                        <th>Type</th>
+                        <th>Description Short</th>
+                        <th>Description Long</th>
+                        <th class="admin-actions-header" id="management-actions-header">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="management-tracker-table-body">
+                    <!-- Management entries will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Hotel Issues Table -->
+        <div class="tracker-table-container" style="margin-top: 1.5rem;">
+            <h2 style="margin: 0 0 1rem 0; font-size: 1.25rem; color: #1a1a1a;">Hotel Issues</h2>
             <table class="tracker-table">
                 <thead>
                     <tr>
@@ -453,11 +519,11 @@
                         <th>Type</th>
                         <th>Description Short</th>
                         <th>Description Long</th>
-                        <th class="admin-actions-header" id="actions-header">Actions</th>
+                        <th class="admin-actions-header" id="hotel-actions-header">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="tracker-table-body">
-                    <!-- Entries will be populated by JavaScript -->
+                <tbody id="hotel-tracker-table-body">
+                    <!-- Hotel entries will be populated by JavaScript -->
                 </tbody>
             </table>
         </div>
@@ -470,8 +536,15 @@
                 <h2 id="entry-modal-title">Create New Entry</h2>
             </div>
             <form id="entry-form">
+                <div class="form-group">
+                    <label for="entry-issue-level">Issue Level *</label>
+                    <select id="entry-issue-level" required>
+                        <option value="hotel">Hotel Issue - Specific to one hotel</option>
+                        <option value="management">Management Issue - Affects the management company</option>
+                    </select>
+                </div>
                 <div class="form-row">
-                    <div class="form-group">
+                    <div class="form-group" id="hotel-field-group">
                         <label for="entry-hotel">Hotel Name *</label>
                         <select id="entry-hotel" required>
                             <option value="">Select hotel...</option>

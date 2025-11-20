@@ -1,11 +1,14 @@
 import { supabase } from './supabase-config.js';
 
-let allEntries = [];
+let hotelEntries = [];
+let managementEntries = [];
 let allHotels = [];
 let allManagementCompanies = [];
 let currentUser = null;
 let editingEntryId = null;
+let editingEntryType = null; // 'hotel' or 'management'
 let entryToDelete = null;
+let deleteEntryType = null; // 'hotel' or 'management'
 
 // Check authentication and restrict to internal users only
 async function initPage() {
@@ -38,7 +41,8 @@ async function initPage() {
         // Show admin UI elements
         document.getElementById('create-entry-btn').style.display = 'inline-flex';
         document.getElementById('manage-lists-btn').style.display = 'inline-flex';
-        document.getElementById('actions-header').classList.add('show');
+        document.getElementById('hotel-actions-header').classList.add('show');
+        document.getElementById('management-actions-header').classList.add('show');
     }
 
     document.getElementById('user-email').textContent = session.user.email;
@@ -147,10 +151,11 @@ function populateDropdowns() {
     });
 }
 
-// Load tracker entries from database
+// Load tracker entries from both databases
 async function loadEntries() {
     try {
-        const { data, error } = await supabase
+        // Load hotel tracker entries
+        const { data: hotelData, error: hotelError } = await supabase
             .from('hotel_tracker')
             .select(`
                 *,
@@ -159,24 +164,38 @@ async function loadEntries() {
             `)
             .order('date_reported', { ascending: false });
 
-        if (error) throw error;
+        if (hotelError) throw hotelError;
+        hotelEntries = hotelData || [];
 
-        allEntries = data || [];
-        displayEntries(allEntries);
+        // Load management tracker entries
+        const { data: managementData, error: managementError } = await supabase
+            .from('management_tracker')
+            .select(`
+                *,
+                management_companies (id, name)
+            `)
+            .order('date_reported', { ascending: false });
+
+        if (managementError) throw managementError;
+        managementEntries = managementData || [];
+
+        // Display both tables
+        displayHotelEntries(hotelEntries);
+        displayManagementEntries(managementEntries);
     } catch (error) {
         console.error('Error loading entries:', error);
         alert('Error loading tracker entries. Please refresh the page.');
     }
 }
 
-// Display entries in table
-function displayEntries(entries) {
-    const tbody = document.getElementById('tracker-table-body');
+// Display hotel entries in table
+function displayHotelEntries(entries) {
+    const tbody = document.getElementById('hotel-tracker-table-body');
     tbody.innerHTML = '';
 
     if (entries.length === 0) {
         const colspan = currentUser?.role === 'admin' ? '8' : '7';
-        tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 3rem; color: #6b7280;">No entries found</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 3rem; color: #6b7280;">No hotel entries found</td></tr>`;
         return;
     }
 
@@ -207,13 +226,13 @@ function displayEntries(entries) {
         if (currentUser?.role === 'admin') {
             actionsHtml = `
                 <td class="tracker-actions">
-                    <button class="btn-icon btn-edit" onclick="window.editEntry('${entry.id}')" title="Edit">
+                    <button class="btn-icon btn-edit" onclick="window.editHotelEntry('${entry.id}')" title="Edit">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                         </svg>
                     </button>
-                    <button class="btn-icon btn-delete" onclick="window.deleteEntry('${entry.id}')" title="Delete">
+                    <button class="btn-icon btn-delete" onclick="window.deleteHotelEntry('${entry.id}')" title="Delete">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="3 6 5 6 21 6"></polyline>
                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -238,6 +257,74 @@ function displayEntries(entries) {
     });
 }
 
+// Display management entries in table
+function displayManagementEntries(entries) {
+    const tbody = document.getElementById('management-tracker-table-body');
+    tbody.innerHTML = '';
+
+    if (entries.length === 0) {
+        const colspan = currentUser?.role === 'admin' ? '7' : '6';
+        tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 3rem; color: #6b7280;">No management entries found</td></tr>`;
+        return;
+    }
+
+    entries.forEach(entry => {
+        const tr = document.createElement('tr');
+
+        // Type badge
+        const typeClass = entry.type === 'Issue' ? 'type-issue' : 'type-tactic';
+        const typeBadge = `<span class="type-badge ${typeClass}">${entry.type}</span>`;
+
+        // Current badge
+        const currentClass = entry.is_current ? 'current-yes' : 'current-no';
+        const currentText = entry.is_current ? 'Yes' : 'No';
+        const currentBadge = `<span class="current-badge ${currentClass}">${currentText}</span>`;
+
+        // Format date
+        const dateFormatted = new Date(entry.date_reported).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        });
+
+        // Description long
+        const descriptionLong = entry.description_long ? entry.description_long.replace(/\n/g, '<br>') : '<span style="color: #9ca3af;">-</span>';
+
+        // Admin actions
+        let actionsHtml = '';
+        if (currentUser?.role === 'admin') {
+            actionsHtml = `
+                <td class="tracker-actions">
+                    <button class="btn-icon btn-edit" onclick="window.editManagementEntry('${entry.id}')" title="Edit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+                    <button class="btn-icon btn-delete" onclick="window.deleteManagementEntry('${entry.id}')" title="Delete">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </td>
+            `;
+        }
+
+        tr.innerHTML = `
+            <td style="font-weight: 500;">${entry.management_companies.name}</td>
+            <td style="white-space: nowrap;">${dateFormatted}</td>
+            <td>${currentBadge}</td>
+            <td>${typeBadge}</td>
+            <td>${entry.description_short}</td>
+            <td style="max-width: 300px;">${descriptionLong}</td>
+            ${actionsHtml}
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
 // Filter and search functionality
 function applyFilters() {
     const searchQuery = document.getElementById('search-input').value.toLowerCase();
@@ -246,42 +333,78 @@ function applyFilters() {
     const filterHotel = document.getElementById('filter-hotel').value;
     const filterCompany = document.getElementById('filter-company').value;
 
-    let filtered = allEntries;
+    // Filter hotel entries
+    let filteredHotel = hotelEntries;
 
-    // Apply search
+    // Apply search to hotel entries
     if (searchQuery) {
-        filtered = filtered.filter(entry => {
-            const hotelName = entry.hotels.name.toLowerCase();
+        filteredHotel = filteredHotel.filter(entry => {
+            const hotelName = (entry.hotels?.name || '').toLowerCase();
+            const companyName = (entry.management_companies?.name || '').toLowerCase();
             const descShort = entry.description_short.toLowerCase();
             const descLong = (entry.description_long || '').toLowerCase();
             return hotelName.includes(searchQuery) ||
+                   companyName.includes(searchQuery) ||
                    descShort.includes(searchQuery) ||
                    descLong.includes(searchQuery);
         });
     }
 
-    // Apply type filter
+    // Apply type filter to hotel entries
     if (filterType) {
-        filtered = filtered.filter(entry => entry.type === filterType);
+        filteredHotel = filteredHotel.filter(entry => entry.type === filterType);
     }
 
-    // Apply current filter
+    // Apply current filter to hotel entries
     if (filterCurrent !== '') {
         const isCurrent = filterCurrent === 'true';
-        filtered = filtered.filter(entry => entry.is_current === isCurrent);
+        filteredHotel = filteredHotel.filter(entry => entry.is_current === isCurrent);
     }
 
     // Apply hotel filter
     if (filterHotel) {
-        filtered = filtered.filter(entry => entry.hotel_id === filterHotel);
+        filteredHotel = filteredHotel.filter(entry => entry.hotel_id === filterHotel);
     }
 
-    // Apply management company filter
+    // Apply management company filter to hotel entries
     if (filterCompany) {
-        filtered = filtered.filter(entry => entry.management_company_id === filterCompany);
+        filteredHotel = filteredHotel.filter(entry => entry.management_company_id === filterCompany);
     }
 
-    displayEntries(filtered);
+    // Filter management entries
+    let filteredManagement = managementEntries;
+
+    // Apply search to management entries
+    if (searchQuery) {
+        filteredManagement = filteredManagement.filter(entry => {
+            const companyName = (entry.management_companies?.name || '').toLowerCase();
+            const descShort = entry.description_short.toLowerCase();
+            const descLong = (entry.description_long || '').toLowerCase();
+            return companyName.includes(searchQuery) ||
+                   descShort.includes(searchQuery) ||
+                   descLong.includes(searchQuery);
+        });
+    }
+
+    // Apply type filter to management entries
+    if (filterType) {
+        filteredManagement = filteredManagement.filter(entry => entry.type === filterType);
+    }
+
+    // Apply current filter to management entries
+    if (filterCurrent !== '') {
+        const isCurrent = filterCurrent === 'true';
+        filteredManagement = filteredManagement.filter(entry => entry.is_current === isCurrent);
+    }
+
+    // Apply management company filter to management entries
+    if (filterCompany) {
+        filteredManagement = filteredManagement.filter(entry => entry.management_company_id === filterCompany);
+    }
+
+    // Display both filtered tables
+    displayHotelEntries(filteredHotel);
+    displayManagementEntries(filteredManagement);
 }
 
 // Attach filter event listeners
@@ -291,13 +414,32 @@ document.getElementById('filter-current').addEventListener('change', applyFilter
 document.getElementById('filter-hotel').addEventListener('change', applyFilters);
 document.getElementById('filter-company').addEventListener('change', applyFilters);
 
+// Handle issue level change to show/hide hotel field
+document.getElementById('entry-issue-level')?.addEventListener('change', (e) => {
+    const hotelFieldGroup = document.getElementById('hotel-field-group');
+    const hotelSelect = document.getElementById('entry-hotel');
+
+    if (e.target.value === 'management') {
+        hotelFieldGroup.style.display = 'none';
+        hotelSelect.removeAttribute('required');
+    } else {
+        hotelFieldGroup.style.display = 'block';
+        hotelSelect.setAttribute('required', 'required');
+    }
+});
+
 // Create entry button
 document.getElementById('create-entry-btn')?.addEventListener('click', () => {
     editingEntryId = null;
+    editingEntryType = null;
     document.getElementById('entry-modal-title').textContent = 'Create New Entry';
     document.getElementById('entry-form').reset();
     // Set default date to today
     document.getElementById('entry-date').valueAsDate = new Date();
+    // Set default to hotel issue
+    document.getElementById('entry-issue-level').value = 'hotel';
+    document.getElementById('hotel-field-group').style.display = 'block';
+    document.getElementById('entry-hotel').setAttribute('required', 'required');
     document.getElementById('entry-modal').classList.add('active');
 });
 
@@ -310,34 +452,69 @@ document.getElementById('cancel-entry-btn').addEventListener('click', () => {
 document.getElementById('entry-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const entryData = {
-        hotel_id: document.getElementById('entry-hotel').value,
-        management_company_id: document.getElementById('entry-management-company').value,
-        date_reported: document.getElementById('entry-date').value,
-        type: document.getElementById('entry-type').value,
-        is_current: document.getElementById('entry-current').value === 'true',
-        description_short: document.getElementById('entry-description-short').value,
-        description_long: document.getElementById('entry-description-long').value || null
-    };
+    const issueLevel = document.getElementById('entry-issue-level').value;
+    const isHotelIssue = issueLevel === 'hotel';
 
     try {
-        if (editingEntryId) {
-            // Update existing entry
-            const { error } = await supabase
-                .from('hotel_tracker')
-                .update(entryData)
-                .eq('id', editingEntryId);
+        if (isHotelIssue) {
+            // Hotel issue - save to hotel_tracker
+            const entryData = {
+                hotel_id: document.getElementById('entry-hotel').value,
+                management_company_id: document.getElementById('entry-management-company').value,
+                date_reported: document.getElementById('entry-date').value,
+                type: document.getElementById('entry-type').value,
+                is_current: document.getElementById('entry-current').value === 'true',
+                description_short: document.getElementById('entry-description-short').value,
+                description_long: document.getElementById('entry-description-long').value || null
+            };
 
-            if (error) throw error;
-            alert('Entry updated successfully!');
+            if (editingEntryId && editingEntryType === 'hotel') {
+                // Update existing hotel entry
+                const { error } = await supabase
+                    .from('hotel_tracker')
+                    .update(entryData)
+                    .eq('id', editingEntryId);
+
+                if (error) throw error;
+                alert('Hotel entry updated successfully!');
+            } else {
+                // Create new hotel entry
+                const { error } = await supabase
+                    .from('hotel_tracker')
+                    .insert([entryData]);
+
+                if (error) throw error;
+                alert('Hotel entry created successfully!');
+            }
         } else {
-            // Create new entry
-            const { error } = await supabase
-                .from('hotel_tracker')
-                .insert([entryData]);
+            // Management issue - save to management_tracker
+            const entryData = {
+                management_company_id: document.getElementById('entry-management-company').value,
+                date_reported: document.getElementById('entry-date').value,
+                type: document.getElementById('entry-type').value,
+                is_current: document.getElementById('entry-current').value === 'true',
+                description_short: document.getElementById('entry-description-short').value,
+                description_long: document.getElementById('entry-description-long').value || null
+            };
 
-            if (error) throw error;
-            alert('Entry created successfully!');
+            if (editingEntryId && editingEntryType === 'management') {
+                // Update existing management entry
+                const { error } = await supabase
+                    .from('management_tracker')
+                    .update(entryData)
+                    .eq('id', editingEntryId);
+
+                if (error) throw error;
+                alert('Management entry updated successfully!');
+            } else {
+                // Create new management entry
+                const { error } = await supabase
+                    .from('management_tracker')
+                    .insert([entryData]);
+
+                if (error) throw error;
+                alert('Management entry created successfully!');
+            }
         }
 
         document.getElementById('entry-modal').classList.remove('active');
@@ -348,13 +525,17 @@ document.getElementById('entry-form').addEventListener('submit', async (e) => {
     }
 });
 
-// Edit entry function (exposed to window for onclick)
-window.editEntry = async (entryId) => {
-    const entry = allEntries.find(e => e.id === entryId);
+// Edit hotel entry function (exposed to window for onclick)
+window.editHotelEntry = async (entryId) => {
+    const entry = hotelEntries.find(e => e.id === entryId);
     if (!entry) return;
 
     editingEntryId = entryId;
-    document.getElementById('entry-modal-title').textContent = 'Edit Entry';
+    editingEntryType = 'hotel';
+    document.getElementById('entry-modal-title').textContent = 'Edit Hotel Entry';
+    document.getElementById('entry-issue-level').value = 'hotel';
+    document.getElementById('hotel-field-group').style.display = 'block';
+    document.getElementById('entry-hotel').setAttribute('required', 'required');
     document.getElementById('entry-hotel').value = entry.hotel_id;
     document.getElementById('entry-management-company').value = entry.management_company_id;
     document.getElementById('entry-date').value = entry.date_reported;
@@ -365,13 +546,47 @@ window.editEntry = async (entryId) => {
     document.getElementById('entry-modal').classList.add('active');
 };
 
-// Delete entry function (exposed to window for onclick)
-window.deleteEntry = (entryId) => {
-    const entry = allEntries.find(e => e.id === entryId);
+// Edit management entry function (exposed to window for onclick)
+window.editManagementEntry = async (entryId) => {
+    const entry = managementEntries.find(e => e.id === entryId);
+    if (!entry) return;
+
+    editingEntryId = entryId;
+    editingEntryType = 'management';
+    document.getElementById('entry-modal-title').textContent = 'Edit Management Entry';
+    document.getElementById('entry-issue-level').value = 'management';
+    document.getElementById('hotel-field-group').style.display = 'none';
+    document.getElementById('entry-hotel').removeAttribute('required');
+    document.getElementById('entry-management-company').value = entry.management_company_id;
+    document.getElementById('entry-date').value = entry.date_reported;
+    document.getElementById('entry-type').value = entry.type;
+    document.getElementById('entry-current').value = entry.is_current.toString();
+    document.getElementById('entry-description-short').value = entry.description_short;
+    document.getElementById('entry-description-long').value = entry.description_long || '';
+    document.getElementById('entry-modal').classList.add('active');
+};
+
+// Delete hotel entry function (exposed to window for onclick)
+window.deleteHotelEntry = (entryId) => {
+    const entry = hotelEntries.find(e => e.id === entryId);
     if (!entry) return;
 
     entryToDelete = entryId;
-    document.getElementById('delete-entry-name').textContent = `${entry.hotels.name} - ${entry.description_short}`;
+    deleteEntryType = 'hotel';
+    const displayName = `${entry.hotels.name} - ${entry.description_short}`;
+    document.getElementById('delete-entry-name').textContent = displayName;
+    document.getElementById('delete-entry-modal').classList.add('active');
+};
+
+// Delete management entry function (exposed to window for onclick)
+window.deleteManagementEntry = (entryId) => {
+    const entry = managementEntries.find(e => e.id === entryId);
+    if (!entry) return;
+
+    entryToDelete = entryId;
+    deleteEntryType = 'management';
+    const displayName = `${entry.management_companies.name} (Management) - ${entry.description_short}`;
+    document.getElementById('delete-entry-name').textContent = displayName;
     document.getElementById('delete-entry-modal').classList.add('active');
 };
 
@@ -383,19 +598,22 @@ document.getElementById('cancel-delete-btn').addEventListener('click', () => {
 
 // Confirm delete button
 document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
-    if (!entryToDelete) return;
+    if (!entryToDelete || !deleteEntryType) return;
 
     try {
+        const tableName = deleteEntryType === 'hotel' ? 'hotel_tracker' : 'management_tracker';
         const { error } = await supabase
-            .from('hotel_tracker')
+            .from(tableName)
             .delete()
             .eq('id', entryToDelete);
 
         if (error) throw error;
 
-        alert('Entry deleted successfully!');
+        const entryTypeName = deleteEntryType === 'hotel' ? 'Hotel' : 'Management';
+        alert(`${entryTypeName} entry deleted successfully!`);
         document.getElementById('delete-entry-modal').classList.remove('active');
         entryToDelete = null;
+        deleteEntryType = null;
         await loadEntries();
     } catch (error) {
         console.error('Error deleting entry:', error);
