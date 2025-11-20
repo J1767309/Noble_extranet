@@ -7,7 +7,7 @@ const corsHeaders = {
 
 // Google Gemini API configuration
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') ?? ''
-const GEMINI_MODEL = 'gemini-1.5-flash' // Use stable model with better rate limits (15 RPM free tier)
+const GEMINI_MODEL = 'gemini-1.5-flash-latest' // Use stable model with better rate limits (15 RPM free tier)
 
 interface ChatRequest {
   conversationId?: string
