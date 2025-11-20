@@ -168,7 +168,6 @@ function applyFilters() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
     const filterHotel = document.getElementById('filter-hotel').value;
     const filterType = document.getElementById('filter-type').value;
-    const filterStatus = document.getElementById('filter-status').value;
 
     let filtered = allInitiatives.filter(initiative => {
         const matchesSearch = searchTerm === '' ||
@@ -178,9 +177,8 @@ function applyFilters() {
 
         const matchesHotel = filterHotel === '' || initiative.hotel_name === filterHotel;
         const matchesType = filterType === '' || initiative.initiative_type === filterType;
-        const matchesStatus = filterStatus === '' || initiative.status === filterStatus;
 
-        return matchesSearch && matchesHotel && matchesType && matchesStatus;
+        return matchesSearch && matchesHotel && matchesType;
     });
 
     displayInitiatives(filtered);
@@ -258,7 +256,6 @@ function displayInitiatives(initiatives) {
 document.getElementById('search-input').addEventListener('input', applyFilters);
 document.getElementById('filter-hotel').addEventListener('change', applyFilters);
 document.getElementById('filter-type').addEventListener('change', applyFilters);
-document.getElementById('filter-status').addEventListener('change', applyFilters);
 
 // Create new initiative button
 document.getElementById('create-initiative-btn')?.addEventListener('click', () => {
