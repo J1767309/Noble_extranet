@@ -209,25 +209,51 @@ function displayHotelEntries(entries) {
     sortedEntries.forEach(entry => {
         const tr = document.createElement('tr');
 
-        // Type badge (clickable for admins)
-        const typeClass = entry.type === 'Issue' ? 'type-issue' : 'type-tactic';
-        const typeClickable = currentUser?.role === 'admin' ? 'clickable-badge' : '';
-        const typeOnclick = currentUser?.role === 'admin' ? `onclick="window.toggleHotelType('${entry.id}', '${entry.type}')"` : '';
-        const typeBadge = `<span class="type-badge ${typeClass} ${typeClickable}" ${typeOnclick} title="${currentUser?.role === 'admin' ? 'Click to toggle' : ''}">${entry.type}</span>`;
+        // Type - dropdown for admins, badge for non-admins
+        let typeDisplay;
+        if (currentUser?.role === 'admin') {
+            typeDisplay = `
+                <select class="inline-select type-select" onchange="window.updateHotelType('${entry.id}', this.value)">
+                    <option value="Issue" ${entry.type === 'Issue' ? 'selected' : ''}>Issue</option>
+                    <option value="Tactic" ${entry.type === 'Tactic' ? 'selected' : ''}>Tactic</option>
+                </select>
+            `;
+        } else {
+            const typeClass = entry.type === 'Issue' ? 'type-issue' : 'type-tactic';
+            typeDisplay = `<span class="type-badge ${typeClass}">${entry.type}</span>`;
+        }
 
-        // Current badge (clickable for admins)
-        const currentClass = entry.is_current ? 'current-yes' : 'current-no';
-        const currentText = entry.is_current ? 'Yes' : 'No';
-        const currentClickable = currentUser?.role === 'admin' ? 'clickable-badge' : '';
-        const currentOnclick = currentUser?.role === 'admin' ? `onclick="window.toggleHotelCurrent('${entry.id}', ${entry.is_current})"` : '';
-        const currentBadge = `<span class="current-badge ${currentClass} ${currentClickable}" ${currentOnclick} title="${currentUser?.role === 'admin' ? 'Click to toggle' : ''}">${currentText}</span>`;
+        // Current - dropdown for admins, badge for non-admins
+        let currentDisplay;
+        if (currentUser?.role === 'admin') {
+            currentDisplay = `
+                <select class="inline-select current-select" onchange="window.updateHotelCurrent('${entry.id}', this.value)">
+                    <option value="true" ${entry.is_current ? 'selected' : ''}>Yes</option>
+                    <option value="false" ${!entry.is_current ? 'selected' : ''}>No</option>
+                </select>
+            `;
+        } else {
+            const currentClass = entry.is_current ? 'current-yes' : 'current-no';
+            const currentText = entry.is_current ? 'Yes' : 'No';
+            currentDisplay = `<span class="current-badge ${currentClass}">${currentText}</span>`;
+        }
 
-        // Impact badge (clickable for admins)
-        const impactClass = entry.impact === 'High' ? 'impact-high' :
-                           entry.impact === 'Medium' ? 'impact-medium' : 'impact-low';
-        const impactClickable = currentUser?.role === 'admin' ? 'clickable-badge' : '';
-        const impactOnclick = currentUser?.role === 'admin' ? `onclick="window.cycleHotelImpact('${entry.id}', '${entry.impact || 'Medium'}')"` : '';
-        const impactBadge = `<span class="impact-badge ${impactClass} ${impactClickable}" ${impactOnclick} title="${currentUser?.role === 'admin' ? 'Click to cycle' : ''}">${entry.impact || 'Medium'}</span>`;
+        // Impact - dropdown for admins, badge for non-admins
+        let impactDisplay;
+        if (currentUser?.role === 'admin') {
+            const impactValue = entry.impact || 'Medium';
+            impactDisplay = `
+                <select class="inline-select impact-select" onchange="window.updateHotelImpact('${entry.id}', this.value)">
+                    <option value="Low" ${impactValue === 'Low' ? 'selected' : ''}>Low</option>
+                    <option value="Medium" ${impactValue === 'Medium' ? 'selected' : ''}>Medium</option>
+                    <option value="High" ${impactValue === 'High' ? 'selected' : ''}>High</option>
+                </select>
+            `;
+        } else {
+            const impactClass = entry.impact === 'High' ? 'impact-high' :
+                               entry.impact === 'Medium' ? 'impact-medium' : 'impact-low';
+            impactDisplay = `<span class="impact-badge ${impactClass}">${entry.impact || 'Medium'}</span>`;
+        }
 
         // Format date
         const dateFormatted = new Date(entry.date_reported).toLocaleDateString('en-US', {
@@ -264,9 +290,9 @@ function displayHotelEntries(entries) {
             <td style="font-weight: 500;">${entry.hotels.name}</td>
             <td>${entry.management_companies.name}</td>
             <td style="white-space: nowrap;">${dateFormatted}</td>
-            <td>${currentBadge}</td>
-            <td>${typeBadge}</td>
-            <td>${impactBadge}</td>
+            <td>${currentDisplay}</td>
+            <td>${typeDisplay}</td>
+            <td>${impactDisplay}</td>
             <td>${entry.description_short}</td>
             <td style="max-width: 300px;">${descriptionLong}</td>
             ${actionsHtml}
@@ -290,18 +316,34 @@ function displayManagementEntries(entries) {
     entries.forEach(entry => {
         const tr = document.createElement('tr');
 
-        // Type badge (clickable for admins)
-        const typeClass = entry.type === 'Issue' ? 'type-issue' : 'type-tactic';
-        const typeClickable = currentUser?.role === 'admin' ? 'clickable-badge' : '';
-        const typeOnclick = currentUser?.role === 'admin' ? `onclick="window.toggleManagementType('${entry.id}', '${entry.type}')"` : '';
-        const typeBadge = `<span class="type-badge ${typeClass} ${typeClickable}" ${typeOnclick} title="${currentUser?.role === 'admin' ? 'Click to toggle' : ''}">${entry.type}</span>`;
+        // Type - dropdown for admins, badge for non-admins
+        let typeDisplay;
+        if (currentUser?.role === 'admin') {
+            typeDisplay = `
+                <select class="inline-select type-select" onchange="window.updateManagementType('${entry.id}', this.value)">
+                    <option value="Issue" ${entry.type === 'Issue' ? 'selected' : ''}>Issue</option>
+                    <option value="Tactic" ${entry.type === 'Tactic' ? 'selected' : ''}>Tactic</option>
+                </select>
+            `;
+        } else {
+            const typeClass = entry.type === 'Issue' ? 'type-issue' : 'type-tactic';
+            typeDisplay = `<span class="type-badge ${typeClass}">${entry.type}</span>`;
+        }
 
-        // Current badge (clickable for admins)
-        const currentClass = entry.is_current ? 'current-yes' : 'current-no';
-        const currentText = entry.is_current ? 'Yes' : 'No';
-        const currentClickable = currentUser?.role === 'admin' ? 'clickable-badge' : '';
-        const currentOnclick = currentUser?.role === 'admin' ? `onclick="window.toggleManagementCurrent('${entry.id}', ${entry.is_current})"` : '';
-        const currentBadge = `<span class="current-badge ${currentClass} ${currentClickable}" ${currentOnclick} title="${currentUser?.role === 'admin' ? 'Click to toggle' : ''}">${currentText}</span>`;
+        // Current - dropdown for admins, badge for non-admins
+        let currentDisplay;
+        if (currentUser?.role === 'admin') {
+            currentDisplay = `
+                <select class="inline-select current-select" onchange="window.updateManagementCurrent('${entry.id}', this.value)">
+                    <option value="true" ${entry.is_current ? 'selected' : ''}>Yes</option>
+                    <option value="false" ${!entry.is_current ? 'selected' : ''}>No</option>
+                </select>
+            `;
+        } else {
+            const currentClass = entry.is_current ? 'current-yes' : 'current-no';
+            const currentText = entry.is_current ? 'Yes' : 'No';
+            currentDisplay = `<span class="current-badge ${currentClass}">${currentText}</span>`;
+        }
 
         // Format date
         const dateFormatted = new Date(entry.date_reported).toLocaleDateString('en-US', {
@@ -337,8 +379,8 @@ function displayManagementEntries(entries) {
         tr.innerHTML = `
             <td style="font-weight: 500;">${entry.management_companies.name}</td>
             <td style="white-space: nowrap;">${dateFormatted}</td>
-            <td>${currentBadge}</td>
-            <td>${typeBadge}</td>
+            <td>${currentDisplay}</td>
+            <td>${typeDisplay}</td>
             <td>${entry.description_short}</td>
             <td style="max-width: 300px;">${descriptionLong}</td>
             ${actionsHtml}
@@ -931,11 +973,13 @@ window.deleteCompany = async (companyId) => {
 };
 
 // Quick edit functions for hotel entries
-window.toggleHotelCurrent = async (entryId, currentValue) => {
+window.updateHotelCurrent = async (entryId, newValue) => {
+    const isCurrent = newValue === 'true';
+
     try {
         const { error } = await supabase
             .from('hotel_tracker')
-            .update({ is_current: !currentValue })
+            .update({ is_current: isCurrent })
             .eq('id', entryId);
 
         if (error) throw error;
@@ -946,9 +990,7 @@ window.toggleHotelCurrent = async (entryId, currentValue) => {
     }
 };
 
-window.toggleHotelType = async (entryId, currentType) => {
-    const newType = currentType === 'Issue' ? 'Tactic' : 'Issue';
-
+window.updateHotelType = async (entryId, newType) => {
     try {
         const { error } = await supabase
             .from('hotel_tracker')
@@ -963,10 +1005,7 @@ window.toggleHotelType = async (entryId, currentType) => {
     }
 };
 
-window.cycleHotelImpact = async (entryId, currentImpact) => {
-    const impactCycle = { 'Low': 'Medium', 'Medium': 'High', 'High': 'Low' };
-    const newImpact = impactCycle[currentImpact] || 'Medium';
-
+window.updateHotelImpact = async (entryId, newImpact) => {
     try {
         const { error } = await supabase
             .from('hotel_tracker')
@@ -982,11 +1021,13 @@ window.cycleHotelImpact = async (entryId, currentImpact) => {
 };
 
 // Quick edit functions for management entries
-window.toggleManagementCurrent = async (entryId, currentValue) => {
+window.updateManagementCurrent = async (entryId, newValue) => {
+    const isCurrent = newValue === 'true';
+
     try {
         const { error } = await supabase
             .from('management_tracker')
-            .update({ is_current: !currentValue })
+            .update({ is_current: isCurrent })
             .eq('id', entryId);
 
         if (error) throw error;
@@ -997,9 +1038,7 @@ window.toggleManagementCurrent = async (entryId, currentValue) => {
     }
 };
 
-window.toggleManagementType = async (entryId, currentType) => {
-    const newType = currentType === 'Issue' ? 'Tactic' : 'Issue';
-
+window.updateManagementType = async (entryId, newType) => {
     try {
         const { error } = await supabase
             .from('management_tracker')

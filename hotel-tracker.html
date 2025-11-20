@@ -214,6 +214,61 @@
             transform: scale(0.95);
         }
 
+        /* Inline select dropdowns for quick editing */
+        .inline-select {
+            padding: 0.25rem 0.5rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: white;
+            color: #374151;
+            transition: all 0.2s;
+        }
+
+        .inline-select:hover {
+            border-color: #3b82f6;
+            background: #f9fafb;
+        }
+
+        .inline-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Type select colors */
+        .inline-select.type-select option[value="Issue"] {
+            color: #991b1b;
+        }
+
+        .inline-select.type-select option[value="Tactic"] {
+            color: #1e40af;
+        }
+
+        /* Current select colors */
+        .inline-select.current-select option[value="true"] {
+            color: #065f46;
+        }
+
+        .inline-select.current-select option[value="false"] {
+            color: #6b7280;
+        }
+
+        /* Impact select colors */
+        .inline-select.impact-select option[value="High"] {
+            color: #991b1b;
+        }
+
+        .inline-select.impact-select option[value="Medium"] {
+            color: #92400e;
+        }
+
+        .inline-select.impact-select option[value="Low"] {
+            color: #1e40af;
+        }
+
         .search-section {
             background: white;
             border-radius: 8px;
