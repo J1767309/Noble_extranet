@@ -39,7 +39,7 @@
             vertical-align: top;
         }
 
-        /* Column widths for Hotel table */
+        /* Column widths for Hotel table (9 columns with Impact) */
         #hotel-tracker-table-body th:nth-child(1),
         #hotel-tracker-table-body td:nth-child(1) {
             width: 12%;
@@ -72,19 +72,25 @@
 
         #hotel-tracker-table-body th:nth-child(6),
         #hotel-tracker-table-body td:nth-child(6) {
-            width: 18%;
-            word-wrap: break-word;
+            width: 6%;
+            white-space: nowrap;
         }
 
         #hotel-tracker-table-body th:nth-child(7),
         #hotel-tracker-table-body td:nth-child(7) {
-            width: 35%;
+            width: 16%;
             word-wrap: break-word;
-            white-space: pre-wrap;
         }
 
         #hotel-tracker-table-body th:nth-child(8),
         #hotel-tracker-table-body td:nth-child(8) {
+            width: 31%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        #hotel-tracker-table-body th:nth-child(9),
+        #hotel-tracker-table-body td:nth-child(9) {
             width: 5%;
             white-space: nowrap;
         }
@@ -169,6 +175,28 @@
         .current-no {
             background: #f3f4f6;
             color: #6b7280;
+        }
+
+        .impact-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .impact-low {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .impact-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .impact-high {
+            background: #fee2e2;
+            color: #991b1b;
         }
 
         .search-section {
@@ -517,6 +545,7 @@
                         <th>Date Reported</th>
                         <th>Current</th>
                         <th>Type</th>
+                        <th>Impact</th>
                         <th>Description Short</th>
                         <th>Description Long</th>
                         <th class="admin-actions-header" id="hotel-actions-header">Actions</th>
@@ -570,6 +599,17 @@
                             <option value="Tactic">Tactic</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-row" id="impact-field-group">
+                    <div class="form-group">
+                        <label for="entry-impact">Impact (Hotel Issues Only) *</label>
+                        <select id="entry-impact">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group"></div>
                 </div>
                 <div class="form-group">
                     <label for="entry-current">Current Status *</label>

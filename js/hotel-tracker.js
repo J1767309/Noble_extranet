@@ -194,12 +194,20 @@ function displayHotelEntries(entries) {
     tbody.innerHTML = '';
 
     if (entries.length === 0) {
-        const colspan = currentUser?.role === 'admin' ? '8' : '7';
+        const colspan = currentUser?.role === 'admin' ? '9' : '8';
         tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; padding: 3rem; color: #6b7280;">No hotel entries found</td></tr>`;
         return;
     }
 
-    entries.forEach(entry => {
+    // Sort entries by hotel name, then by date reported (most recent first)
+    const sortedEntries = [...entries].sort((a, b) => {
+        const hotelCompare = a.hotels.name.localeCompare(b.hotels.name);
+        if (hotelCompare !== 0) return hotelCompare;
+        // Sort by date descending (most recent first)
+        return new Date(b.date_reported) - new Date(a.date_reported);
+    });
+
+    sortedEntries.forEach(entry => {
         const tr = document.createElement('tr');
 
         // Type badge
@@ -210,6 +218,11 @@ function displayHotelEntries(entries) {
         const currentClass = entry.is_current ? 'current-yes' : 'current-no';
         const currentText = entry.is_current ? 'Yes' : 'No';
         const currentBadge = `<span class="current-badge ${currentClass}">${currentText}</span>`;
+
+        // Impact badge
+        const impactClass = entry.impact === 'High' ? 'impact-high' :
+                           entry.impact === 'Medium' ? 'impact-medium' : 'impact-low';
+        const impactBadge = `<span class="impact-badge ${impactClass}">${entry.impact || 'Medium'}</span>`;
 
         // Format date
         const dateFormatted = new Date(entry.date_reported).toLocaleDateString('en-US', {
@@ -248,6 +261,7 @@ function displayHotelEntries(entries) {
             <td style="white-space: nowrap;">${dateFormatted}</td>
             <td>${currentBadge}</td>
             <td>${typeBadge}</td>
+            <td>${impactBadge}</td>
             <td>${entry.description_short}</td>
             <td style="max-width: 300px;">${descriptionLong}</td>
             ${actionsHtml}
@@ -414,17 +428,23 @@ document.getElementById('filter-current').addEventListener('change', applyFilter
 document.getElementById('filter-hotel').addEventListener('change', applyFilters);
 document.getElementById('filter-company').addEventListener('change', applyFilters);
 
-// Handle issue level change to show/hide hotel field
+// Handle issue level change to show/hide hotel field and impact field
 document.getElementById('entry-issue-level')?.addEventListener('change', (e) => {
     const hotelFieldGroup = document.getElementById('hotel-field-group');
     const hotelSelect = document.getElementById('entry-hotel');
+    const impactFieldGroup = document.getElementById('impact-field-group');
+    const impactSelect = document.getElementById('entry-impact');
 
     if (e.target.value === 'management') {
         hotelFieldGroup.style.display = 'none';
         hotelSelect.removeAttribute('required');
+        impactFieldGroup.style.display = 'none';
+        impactSelect.removeAttribute('required');
     } else {
         hotelFieldGroup.style.display = 'block';
         hotelSelect.setAttribute('required', 'required');
+        impactFieldGroup.style.display = 'flex';
+        impactSelect.setAttribute('required', 'required');
     }
 });
 
@@ -440,6 +460,10 @@ document.getElementById('create-entry-btn')?.addEventListener('click', () => {
     document.getElementById('entry-issue-level').value = 'hotel';
     document.getElementById('hotel-field-group').style.display = 'block';
     document.getElementById('entry-hotel').setAttribute('required', 'required');
+    // Show impact field for hotel issues
+    document.getElementById('impact-field-group').style.display = 'flex';
+    document.getElementById('entry-impact').setAttribute('required', 'required');
+    document.getElementById('entry-impact').value = 'Medium'; // Default impact
     document.getElementById('entry-modal').classList.add('active');
 });
 
@@ -464,6 +488,7 @@ document.getElementById('entry-form').addEventListener('submit', async (e) => {
                 date_reported: document.getElementById('entry-date').value,
                 type: document.getElementById('entry-type').value,
                 is_current: document.getElementById('entry-current').value === 'true',
+                impact: document.getElementById('entry-impact').value,
                 description_short: document.getElementById('entry-description-short').value,
                 description_long: document.getElementById('entry-description-long').value || null
             };
@@ -536,11 +561,14 @@ window.editHotelEntry = async (entryId) => {
     document.getElementById('entry-issue-level').value = 'hotel';
     document.getElementById('hotel-field-group').style.display = 'block';
     document.getElementById('entry-hotel').setAttribute('required', 'required');
+    document.getElementById('impact-field-group').style.display = 'flex';
+    document.getElementById('entry-impact').setAttribute('required', 'required');
     document.getElementById('entry-hotel').value = entry.hotel_id;
     document.getElementById('entry-management-company').value = entry.management_company_id;
     document.getElementById('entry-date').value = entry.date_reported;
     document.getElementById('entry-type').value = entry.type;
     document.getElementById('entry-current').value = entry.is_current.toString();
+    document.getElementById('entry-impact').value = entry.impact || 'Medium';
     document.getElementById('entry-description-short').value = entry.description_short;
     document.getElementById('entry-description-long').value = entry.description_long || '';
     document.getElementById('entry-modal').classList.add('active');
@@ -557,6 +585,8 @@ window.editManagementEntry = async (entryId) => {
     document.getElementById('entry-issue-level').value = 'management';
     document.getElementById('hotel-field-group').style.display = 'none';
     document.getElementById('entry-hotel').removeAttribute('required');
+    document.getElementById('impact-field-group').style.display = 'none';
+    document.getElementById('entry-impact').removeAttribute('required');
     document.getElementById('entry-management-company').value = entry.management_company_id;
     document.getElementById('entry-date').value = entry.date_reported;
     document.getElementById('entry-type').value = entry.type;
