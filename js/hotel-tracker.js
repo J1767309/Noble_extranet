@@ -179,9 +179,8 @@ async function loadEntries() {
         if (managementError) throw managementError;
         managementEntries = managementData || [];
 
-        // Display both tables
-        displayHotelEntries(hotelEntries);
-        displayManagementEntries(managementEntries);
+        // Apply filters (which will display the filtered results)
+        applyFilters();
     } catch (error) {
         console.error('Error loading entries:', error);
         alert('Error loading tracker entries. Please refresh the page.');
