@@ -48,6 +48,12 @@ async function init() {
                 if (userMgmtLink) userMgmtLink.style.display = 'flex';
             }
 
+            // Show BI Tools link for internal users
+            if (userData.user_type === 'internal') {
+                const biToolsLink = document.getElementById('bi-tools-link');
+                if (biToolsLink) biToolsLink.style.display = 'flex';
+            }
+
             // Show add task button for admins, creators, and editors
             if (['admin', 'creator', 'editor'].includes(userData.role)) {
                 document.getElementById('add-task-btn').classList.add('show');

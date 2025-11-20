@@ -16,7 +16,7 @@ async function initPage() {
     // Check if user is admin
     const { data: userData, error } = await supabase
         .from('users')
-        .select('role')
+        .select('role, user_type')
         .eq('id', session.user.id)
         .single();
 
@@ -25,6 +25,12 @@ async function initPage() {
         alert('Access denied. User Management is only available to administrators.');
         window.location.href = 'dashboard.html';
         return;
+    }
+
+    // Show BI Tools link for internal users
+    if (userData.user_type === 'internal') {
+        const biToolsLink = document.getElementById('bi-tools-link');
+        if (biToolsLink) biToolsLink.style.display = 'flex';
     }
 
     document.getElementById('user-email').textContent = session.user.email;

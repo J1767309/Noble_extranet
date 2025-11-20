@@ -39,6 +39,12 @@ async function loadUserData() {
                 if (userMgmtLink) userMgmtLink.style.display = 'flex';
                 if (userMgmtCard) userMgmtCard.style.display = 'flex';
             }
+
+            // Show BI Tools link only for internal users
+            if (userData.user_type === 'internal') {
+                const biToolsLink = document.getElementById('bi-tools-link');
+                if (biToolsLink) biToolsLink.style.display = 'flex';
+            }
         }
     } catch (error) {
         console.error('Error:', error);

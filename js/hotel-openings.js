@@ -35,6 +35,12 @@ async function init() {
                 if (userMgmtLink) userMgmtLink.style.display = 'flex';
             }
 
+            // Show BI Tools link for internal users
+            if (userData.user_type === 'internal') {
+                const biToolsLink = document.getElementById('bi-tools-link');
+                if (biToolsLink) biToolsLink.style.display = 'flex';
+            }
+
             // Show create button for admins and creators
             if (userData.role === 'admin' || userData.role === 'creator') {
                 document.getElementById('create-project-btn').classList.add('show');
