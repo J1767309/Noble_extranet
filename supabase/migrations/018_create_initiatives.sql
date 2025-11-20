@@ -18,7 +18,7 @@ DROP POLICY IF EXISTS "Admins can insert initiatives" ON public.initiatives;
 DROP POLICY IF EXISTS "Admins can update initiatives" ON public.initiatives;
 DROP POLICY IF EXISTS "Admins can delete initiatives" ON public.initiatives;
 
--- Initiatives policies: Internal users can view, admins can manage
+-- Initiatives policies: Internal users can view, role-based permissions for actions
 CREATE POLICY "Internal users can view initiatives"
 ON public.initiatives
 FOR SELECT
@@ -31,7 +31,8 @@ USING (
     )
 );
 
-CREATE POLICY "Admins can insert initiatives"
+-- Admins and Creators can insert
+CREATE POLICY "Admins and Creators can insert initiatives"
 ON public.initiatives
 FOR INSERT
 TO authenticated
@@ -39,11 +40,12 @@ WITH CHECK (
     EXISTS (
         SELECT 1 FROM public.users
         WHERE users.id = auth.uid()
-        AND users.role = 'admin'
+        AND users.role IN ('admin', 'creator')
     )
 );
 
-CREATE POLICY "Admins can update initiatives"
+-- Admins, Creators, and Editors can update
+CREATE POLICY "Admins, Creators, and Editors can update initiatives"
 ON public.initiatives
 FOR UPDATE
 TO authenticated
@@ -51,10 +53,11 @@ USING (
     EXISTS (
         SELECT 1 FROM public.users
         WHERE users.id = auth.uid()
-        AND users.role = 'admin'
+        AND users.role IN ('admin', 'creator', 'editor')
     )
 );
 
+-- Only Admins can delete
 CREATE POLICY "Admins can delete initiatives"
 ON public.initiatives
 FOR DELETE

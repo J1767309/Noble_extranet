@@ -30,7 +30,7 @@ DROP POLICY IF EXISTS "Admins can insert hotel top accounts" ON public.hotel_top
 DROP POLICY IF EXISTS "Admins can update hotel top accounts" ON public.hotel_top_accounts;
 DROP POLICY IF EXISTS "Admins can delete hotel top accounts" ON public.hotel_top_accounts;
 
--- Hotel top accounts policies: Internal users can view, admins can manage
+-- Hotel top accounts policies: Internal users can view, role-based permissions for actions
 CREATE POLICY "Internal users can view hotel top accounts"
 ON public.hotel_top_accounts
 FOR SELECT
@@ -43,7 +43,8 @@ USING (
     )
 );
 
-CREATE POLICY "Admins can insert hotel top accounts"
+-- Admins and Creators can insert
+CREATE POLICY "Admins and Creators can insert hotel top accounts"
 ON public.hotel_top_accounts
 FOR INSERT
 TO authenticated
@@ -51,11 +52,12 @@ WITH CHECK (
     EXISTS (
         SELECT 1 FROM public.users
         WHERE users.id = auth.uid()
-        AND users.role = 'admin'
+        AND users.role IN ('admin', 'creator')
     )
 );
 
-CREATE POLICY "Admins can update hotel top accounts"
+-- Admins, Creators, and Editors can update
+CREATE POLICY "Admins, Creators, and Editors can update hotel top accounts"
 ON public.hotel_top_accounts
 FOR UPDATE
 TO authenticated
@@ -63,10 +65,11 @@ USING (
     EXISTS (
         SELECT 1 FROM public.users
         WHERE users.id = auth.uid()
-        AND users.role = 'admin'
+        AND users.role IN ('admin', 'creator', 'editor')
     )
 );
 
+-- Only Admins can delete
 CREATE POLICY "Admins can delete hotel top accounts"
 ON public.hotel_top_accounts
 FOR DELETE
