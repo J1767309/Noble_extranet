@@ -17,8 +17,11 @@ function updateFormLabels() {
     }
 }
 
-// Listen for type changes
-document.getElementById('report-type').addEventListener('change', updateFormLabels);
+// Listen for type changes (only if element exists)
+const reportTypeElement = document.getElementById('report-type');
+if (reportTypeElement) {
+    reportTypeElement.addEventListener('change', updateFormLabels);
+}
 
 // Check authentication state and load user data
 async function loadUserData() {
