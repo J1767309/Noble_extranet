@@ -1,0 +1,77 @@
+-- Migration: 030_add_hotel_images.sql
+-- Add image_url column and update with extracted hotel images
+
+-- Add image_url column if it doesn't exist
+ALTER TABLE public.hotel_fact_sheets ADD COLUMN IF NOT EXISTS image_url TEXT;
+
+-- Update image URLs based on excel_sheet_name
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ac_gainesville.jpeg' WHERE excel_sheet_name = 'AC Gainesville';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/aloft_arundel.png' WHERE excel_sheet_name = 'Aloft Arundel';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/cy_fishers.jpeg' WHERE excel_sheet_name = 'CY Fishers';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/cy_greensburg.jpeg' WHERE excel_sheet_name = 'CY Greensburg';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/cy_jacksonville.jpeg' WHERE excel_sheet_name = 'CY Jacksonville';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/cy_jacksonville_3.jpeg' WHERE excel_sheet_name = 'CY Jacksonville (3)';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/cy_reading.jpeg' WHERE excel_sheet_name = 'CY Reading';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/cy_settlers_airport.jpeg' WHERE excel_sheet_name = 'CY Settlers Airport';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/cy_washington.jpeg' WHERE excel_sheet_name = 'CY Washington';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/es_memphis.png' WHERE excel_sheet_name = 'ES Memphis';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/es_tysons.png' WHERE excel_sheet_name = 'ES Tysons';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/even_seattle.jpeg' WHERE excel_sheet_name = 'EVEN Seattle';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/element_arundel.jpeg' WHERE excel_sheet_name = 'Element Arundel';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/element_nashville.jpeg' WHERE excel_sheet_name = 'Element Nashville';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hgi_atl_perimeter.png' WHERE excel_sheet_name = 'HGI ATL Perimeter';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hgi_boise.png' WHERE excel_sheet_name = 'HGI Boise';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hgi_charlotte.png' WHERE excel_sheet_name = 'HGI Charlotte';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hgi_dallas.png' WHERE excel_sheet_name = 'HGI Dallas';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hgi_jacksonville.png' WHERE excel_sheet_name = 'HGI Jacksonville';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hgi_mt_pleasant.png' WHERE excel_sheet_name = 'HGI Mt Pleasant';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hgi_reagan.png' WHERE excel_sheet_name = 'HGI Reagan';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hh_columbus.png' WHERE excel_sheet_name = 'HH Columbus';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hh_nashville.jpeg' WHERE excel_sheet_name = 'HH Nashville';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hh_raleigh.jpeg' WHERE excel_sheet_name = 'HH Raleigh';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hh_tallahassee.png' WHERE excel_sheet_name = 'HH Tallahassee';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_arlington.png' WHERE excel_sheet_name = 'HI Arlington';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_canal_st.png' WHERE excel_sheet_name = 'HI Canal St';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_charlotte.png' WHERE excel_sheet_name = 'HI Charlotte';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_charlottesville.png' WHERE excel_sheet_name = 'HI Charlottesville';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_denver.png' WHERE excel_sheet_name = 'HI Denver';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_memphis.png' WHERE excel_sheet_name = 'HI Memphis';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_nola_cc.png' WHERE excel_sheet_name = 'HI NOLA CC';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_nola_fq.png' WHERE excel_sheet_name = 'HI NOLA FQ';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_nola_gd.png' WHERE excel_sheet_name = 'HI NOLA GD';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_san_diego.png' WHERE excel_sheet_name = 'HI San Diego';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_savannah.png' WHERE excel_sheet_name = 'HI Savannah';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_tallahassee.png' WHERE excel_sheet_name = 'HI Tallahassee';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hi_tampa.png' WHERE excel_sheet_name = 'HI Tampa';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hie_nashville.png' WHERE excel_sheet_name = 'HIE Nashville';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hie_savannah.png' WHERE excel_sheet_name = 'HIE Savannah';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hp_round_rock.png' WHERE excel_sheet_name = 'HP Round Rock';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hws_denver.png' WHERE excel_sheet_name = 'HWS Denver';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hws_edina.png' WHERE excel_sheet_name = 'HWS Edina';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hws_pittsburgh.png' WHERE excel_sheet_name = 'HWS Pittsburgh';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/hws_slc.png' WHERE excel_sheet_name = 'HWS SLC';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/home2_tampa.png' WHERE excel_sheet_name = 'Home2 Tampa';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/new_haven.png' WHERE excel_sheet_name = 'New Haven';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ri_charlottesville.jpeg' WHERE excel_sheet_name = 'RI Charlottesville';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ri_denver.jpeg' WHERE excel_sheet_name = 'RI Denver';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ri_malvern.jpeg' WHERE excel_sheet_name = 'RI Malvern';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ri_secaucus.jpeg' WHERE excel_sheet_name = 'RI Secaucus';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ri_tampa.png' WHERE excel_sheet_name = 'RI Tampa';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ren_raleigh.jpeg' WHERE excel_sheet_name = 'Ren Raleigh';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/sbs_seattle.png' WHERE excel_sheet_name = 'SBS Seattle';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/shs_columbus.jpeg' WHERE excel_sheet_name = 'SHS Columbus';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/shs_houston.png' WHERE excel_sheet_name = 'SHS Houston';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/shs_pittsburgh.jpeg' WHERE excel_sheet_name = 'SHS Pittsburgh';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/tps_san_diego.png' WHERE excel_sheet_name = 'TPS San Diego';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ws_atlanta_conyers.png' WHERE excel_sheet_name = 'WS Atlanta Conyers';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ws_augusta_fg.png' WHERE excel_sheet_name = 'WS Augusta FG';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ws_augusta_riverwatch.png' WHERE excel_sheet_name = 'WS Augusta Riverwatch';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ws_columbia.png' WHERE excel_sheet_name = 'WS Columbia';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ws_daytona_beach.png' WHERE excel_sheet_name = 'WS Daytona Beach';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ws_greenville_central.png' WHERE excel_sheet_name = 'WS Greenville Central';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ws_greenville_simpsonville.png' WHERE excel_sheet_name = 'WS Greenville Simpsonville';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ws_johnson_city.png' WHERE excel_sheet_name = 'WS Johnson City';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ws_lexington.png' WHERE excel_sheet_name = 'WS Lexington';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ws_macon_north.png' WHERE excel_sheet_name = 'WS Macon North';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/ws_macon_west.png' WHERE excel_sheet_name = 'WS Macon West';
+UPDATE public.hotel_fact_sheets SET image_url = 'images/hotels/westin.png' WHERE excel_sheet_name = 'Westin';

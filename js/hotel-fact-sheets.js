@@ -187,56 +187,69 @@ function displayHotels(hotels) {
         const fullAddress = [hotel.address_street, hotel.address_city, hotel.address_state, hotel.address_zip].filter(Boolean).join(', ');
         const countySubmarket = [hotel.county, hotel.submarket].filter(Boolean).join(' / ');
 
+        // Image or placeholder
+        const imageHtml = hotel.image_url
+            ? `<img src="${escapeHtml(hotel.image_url)}" alt="${escapeHtml(hotel.hotel_name)}" class="hotel-card-image" onerror="this.outerHTML='<div class=\\'hotel-card-image-placeholder\\'><svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\'><path d=\\'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\\'></path><polyline points=\\'9 22 9 12 15 12 15 22\\'></polyline></svg></div>'">`
+            : `<div class="hotel-card-image-placeholder">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+            </div>`;
+
         return `
             <a href="hotel-fact-sheet-detail.html?id=${hotel.id}" class="hotel-card">
-                <div class="hotel-name">${escapeHtml(hotel.hotel_name)}</div>
-                <div class="hotel-location">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                    ${escapeHtml(location || 'Location not specified')}
-                </div>
-                <div class="hotel-stats">
-                    ${hotel.total_rooms ? `
-                        <div class="hotel-stat">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-                            </svg>
-                            ${hotel.total_rooms} rooms
-                        </div>
-                    ` : ''}
-                    ${hotel.year_built ? `
-                        <div class="hotel-stat">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                <line x1="16" y1="2" x2="16" y2="6"></line>
-                                <line x1="8" y1="2" x2="8" y2="6"></line>
-                                <line x1="3" y1="10" x2="21" y2="10"></line>
-                            </svg>
-                            Built ${hotel.year_built}
-                        </div>
-                    ` : ''}
-                </div>
-                ${brand ? `<span class="brand-badge">${escapeHtml(brand)}</span>` : ''}
-                <div class="hotel-contact-section">
-                    <div class="hotel-contact-grid">
-                        <div class="contact-item">
-                            <span class="contact-label">Address</span>
-                            <span class="contact-value ${!fullAddress ? 'empty' : ''}">${escapeHtml(fullAddress) || 'Not specified'}</span>
-                        </div>
-                        <div class="contact-item">
-                            <span class="contact-label">Phone</span>
-                            <span class="contact-value ${!hotel.phone ? 'empty' : ''}">${hotel.phone ? formatPhone(hotel.phone) : 'Not specified'}</span>
-                        </div>
-                        <div class="contact-item">
-                            <span class="contact-label">Website</span>
-                            <span class="contact-value ${!hotel.website ? 'empty' : ''}">${hotel.website ? escapeHtml(hotel.website) : 'Not specified'}</span>
-                        </div>
-                        <div class="contact-item">
-                            <span class="contact-label">County / Submarket</span>
-                            <span class="contact-value ${!countySubmarket ? 'empty' : ''}">${escapeHtml(countySubmarket) || 'Not specified'}</span>
+                ${imageHtml}
+                <div class="hotel-card-content">
+                    <div class="hotel-name">${escapeHtml(hotel.hotel_name)}</div>
+                    <div class="hotel-location">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        ${escapeHtml(location || 'Location not specified')}
+                    </div>
+                    <div class="hotel-stats">
+                        ${hotel.total_rooms ? `
+                            <div class="hotel-stat">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                                </svg>
+                                ${hotel.total_rooms} rooms
+                            </div>
+                        ` : ''}
+                        ${hotel.year_built ? `
+                            <div class="hotel-stat">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                                </svg>
+                                Built ${hotel.year_built}
+                            </div>
+                        ` : ''}
+                    </div>
+                    ${brand ? `<span class="brand-badge">${escapeHtml(brand)}</span>` : ''}
+                    <div class="hotel-contact-section">
+                        <div class="hotel-contact-grid">
+                            <div class="contact-item">
+                                <span class="contact-label">Address</span>
+                                <span class="contact-value ${!fullAddress ? 'empty' : ''}">${escapeHtml(fullAddress) || 'Not specified'}</span>
+                            </div>
+                            <div class="contact-item">
+                                <span class="contact-label">Phone</span>
+                                <span class="contact-value ${!hotel.phone ? 'empty' : ''}">${hotel.phone ? formatPhone(hotel.phone) : 'Not specified'}</span>
+                            </div>
+                            <div class="contact-item">
+                                <span class="contact-label">Website</span>
+                                <span class="contact-value ${!hotel.website ? 'empty' : ''}">${hotel.website ? escapeHtml(hotel.website) : 'Not specified'}</span>
+                            </div>
+                            <div class="contact-item">
+                                <span class="contact-label">County / Submarket</span>
+                                <span class="contact-value ${!countySubmarket ? 'empty' : ''}">${escapeHtml(countySubmarket) || 'Not specified'}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

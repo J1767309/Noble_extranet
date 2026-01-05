@@ -21,6 +21,53 @@
             color: #374151;
         }
 
+        .hotel-header-with-image {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .hotel-header-image-container {
+            flex-shrink: 0;
+            width: 280px;
+            height: 200px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f3f4f6;
+        }
+
+        .hotel-header-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hotel-header-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hotel-header-image-placeholder svg {
+            width: 64px;
+            height: 64px;
+            color: #9ca3af;
+        }
+
+        @media (max-width: 768px) {
+            .hotel-header-with-image {
+                flex-direction: column;
+            }
+
+            .hotel-header-image-container {
+                width: 100%;
+                height: 200px;
+            }
+        }
+
         .hotel-header {
             background: white;
             border-radius: 8px;
