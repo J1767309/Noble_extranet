@@ -23,7 +23,8 @@ const internalLinks = [
     'hotel-top-accounts-link',
     'hotel-partner-notes-link',
     'initiatives-link',
-    'bi-tools-link'
+    'bi-tools-link',
+    'hotel-fact-sheets-link'
 ]
 
 // Show/hide admin links

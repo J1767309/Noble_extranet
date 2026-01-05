@@ -52,8 +52,10 @@ async function init() {
             if (userData.user_type === 'internal') {
                 const hotelTrackerLink = document.getElementById('hotel-tracker-link');
                 const biToolsLink = document.getElementById('bi-tools-link');
+                const hotelFactSheetsLink = document.getElementById('hotel-fact-sheets-link');
                 if (hotelTrackerLink) hotelTrackerLink.style.display = 'flex';
                 if (biToolsLink) biToolsLink.style.display = 'flex';
+                if (hotelFactSheetsLink) hotelFactSheetsLink.style.display = 'flex';
             }
 
             // Show add task button for admins, creators, and editors

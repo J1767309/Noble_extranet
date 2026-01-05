@@ -33,10 +33,12 @@ async function initPage() {
         const hotelTopAccountsLink = document.getElementById('hotel-top-accounts-link');
         const initiativesLink = document.getElementById('initiatives-link');
         const biToolsLink = document.getElementById('bi-tools-link');
+        const hotelFactSheetsLink = document.getElementById('hotel-fact-sheets-link');
         if (hotelTrackerLink) hotelTrackerLink.style.display = 'flex';
         if (hotelTopAccountsLink) hotelTopAccountsLink.style.display = 'flex';
         if (initiativesLink) initiativesLink.style.display = 'flex';
         if (biToolsLink) biToolsLink.style.display = 'flex';
+        if (hotelFactSheetsLink) hotelFactSheetsLink.style.display = 'flex';
     }
 
     document.getElementById('user-email').textContent = session.user.email;
