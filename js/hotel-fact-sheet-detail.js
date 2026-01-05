@@ -346,84 +346,153 @@ function displayHotelData(hotel) {
             <!-- Right Column -->
             <div>
                 <!-- Room Mix -->
-                ${hotel.room_mix && hotel.room_mix.length > 0 ? `
-                    <div class="detail-section">
-                        <h2 class="section-title">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M2 4v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8l-6-6H4c-1.1 0-2 .9-2 2z"></path>
-                                <path d="M14 2v6h6"></path>
-                            </svg>
-                            Room Mix
-                        </h2>
-                        <table class="room-mix-table">
+                <div class="detail-section">
+                    <h2 class="section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 4v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8l-6-6H4c-1.1 0-2 .9-2 2z"></path>
+                            <path d="M14 2v6h6"></path>
+                        </svg>
+                        Room Mix
+                    </h2>
+                    <!-- Display Mode -->
+                    <div class="display-value">
+                        ${hotel.room_mix && hotel.room_mix.length > 0 ? `
+                            <table class="room-mix-table">
+                                <thead>
+                                    <tr>
+                                        <th>Room Type</th>
+                                        <th>Count</th>
+                                        <th>Sq Ft</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${hotel.room_mix.map(room => `
+                                        <tr>
+                                            <td>${escapeHtml(room.type)}</td>
+                                            <td>${room.count}</td>
+                                            <td>${room.sq_ft || '-'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        ` : '<p class="empty">No room mix data</p>'}
+                    </div>
+                    <!-- Edit Mode -->
+                    <div class="edit-field" id="room-mix-edit">
+                        <table class="room-mix-table editable-table">
                             <thead>
                                 <tr>
                                     <th>Room Type</th>
                                     <th>Count</th>
                                     <th>Sq Ft</th>
+                                    <th></th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                ${hotel.room_mix.map(room => `
-                                    <tr>
-                                        <td>${escapeHtml(room.type)}</td>
-                                        <td>${room.count}</td>
-                                        <td>${room.sq_ft || '-'}</td>
+                            <tbody id="room-mix-tbody">
+                                ${(hotel.room_mix || []).map((room, idx) => `
+                                    <tr data-index="${idx}">
+                                        <td><input type="text" class="edit-input-sm" data-array="room_mix" data-index="${idx}" data-prop="type" value="${escapeHtml(room.type || '')}"></td>
+                                        <td><input type="number" class="edit-input-sm" data-array="room_mix" data-index="${idx}" data-prop="count" value="${room.count || ''}"></td>
+                                        <td><input type="text" class="edit-input-sm" data-array="room_mix" data-index="${idx}" data-prop="sq_ft" value="${room.sq_ft || ''}"></td>
+                                        <td><button type="button" class="remove-row-btn" onclick="removeArrayRow('room_mix', ${idx})">×</button></td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
+                        <button type="button" class="add-row-btn" onclick="addRoomMixRow()">+ Add Room Type</button>
                     </div>
-                ` : ''}
+                </div>
 
                 <!-- Meeting Rooms -->
-                ${hotel.meeting_rooms && hotel.meeting_rooms.length > 0 ? `
-                    <div class="detail-section">
-                        <h2 class="section-title">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
-                            Meeting Rooms
-                        </h2>
-                        <table class="room-mix-table">
+                <div class="detail-section">
+                    <h2 class="section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                        </svg>
+                        Meeting Rooms
+                    </h2>
+                    <!-- Display Mode -->
+                    <div class="display-value">
+                        ${hotel.meeting_rooms && hotel.meeting_rooms.length > 0 ? `
+                            <table class="room-mix-table">
+                                <thead>
+                                    <tr>
+                                        <th>Room Name</th>
+                                        <th>Sq Ft</th>
+                                        <th>Dimensions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${hotel.meeting_rooms.map(room => `
+                                        <tr>
+                                            <td>${escapeHtml(room.name)}</td>
+                                            <td>${room.sq_ft || '-'}</td>
+                                            <td>${escapeHtml(room.dimensions) || '-'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        ` : '<p class="empty">No meeting rooms data</p>'}
+                    </div>
+                    <!-- Edit Mode -->
+                    <div class="edit-field" id="meeting-rooms-edit">
+                        <table class="room-mix-table editable-table">
                             <thead>
                                 <tr>
                                     <th>Room Name</th>
                                     <th>Sq Ft</th>
                                     <th>Dimensions</th>
+                                    <th></th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                ${hotel.meeting_rooms.map(room => `
-                                    <tr>
-                                        <td>${escapeHtml(room.name)}</td>
-                                        <td>${room.sq_ft || '-'}</td>
-                                        <td>${escapeHtml(room.dimensions) || '-'}</td>
+                            <tbody id="meeting-rooms-tbody">
+                                ${(hotel.meeting_rooms || []).map((room, idx) => `
+                                    <tr data-index="${idx}">
+                                        <td><input type="text" class="edit-input-sm" data-array="meeting_rooms" data-index="${idx}" data-prop="name" value="${escapeHtml(room.name || '')}"></td>
+                                        <td><input type="text" class="edit-input-sm" data-array="meeting_rooms" data-index="${idx}" data-prop="sq_ft" value="${room.sq_ft || ''}"></td>
+                                        <td><input type="text" class="edit-input-sm" data-array="meeting_rooms" data-index="${idx}" data-prop="dimensions" value="${escapeHtml(room.dimensions || '')}"></td>
+                                        <td><button type="button" class="remove-row-btn" onclick="removeArrayRow('meeting_rooms', ${idx})">×</button></td>
                                     </tr>
                                 `).join('')}
                             </tbody>
                         </table>
+                        <button type="button" class="add-row-btn" onclick="addMeetingRoomRow()">+ Add Meeting Room</button>
                     </div>
-                ` : ''}
+                </div>
 
                 <!-- Competitive Set -->
-                ${hotel.competitive_set && hotel.competitive_set.length > 0 ? `
-                    <div class="detail-section">
-                        <h2 class="section-title">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                                <polyline points="17 6 23 6 23 12"></polyline>
-                            </svg>
-                            Competitive Set
-                        </h2>
-                        <ul class="comp-set-list">
-                            ${hotel.competitive_set.map(comp => `<li>${escapeHtml(comp)}</li>`).join('')}
-                        </ul>
+                <div class="detail-section">
+                    <h2 class="section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                            <polyline points="17 6 23 6 23 12"></polyline>
+                        </svg>
+                        Competitive Set
+                    </h2>
+                    <!-- Display Mode -->
+                    <div class="display-value">
+                        ${hotel.competitive_set && hotel.competitive_set.length > 0 ? `
+                            <ul class="comp-set-list">
+                                ${hotel.competitive_set.map(comp => `<li>${escapeHtml(comp)}</li>`).join('')}
+                            </ul>
+                        ` : '<p class="empty">No competitive set data</p>'}
                     </div>
-                ` : ''}
+                    <!-- Edit Mode -->
+                    <div class="edit-field" id="competitive-set-edit">
+                        <div id="competitive-set-list">
+                            ${(hotel.competitive_set || []).map((comp, idx) => `
+                                <div class="comp-set-row" data-index="${idx}">
+                                    <input type="text" class="edit-input" data-array="competitive_set" data-index="${idx}" value="${escapeHtml(comp || '')}">
+                                    <button type="button" class="remove-row-btn" onclick="removeCompSetRow(${idx})">×</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button type="button" class="add-row-btn" onclick="addCompSetRow()">+ Add Competitor</button>
+                    </div>
+                </div>
 
                 <!-- Features & Amenities -->
                 <div class="detail-section">
@@ -653,10 +722,12 @@ async function saveHotelData() {
     try {
         // Collect all edited values
         const updates = {};
-        const editFields = document.querySelectorAll('.edit-field');
+        const editFields = document.querySelectorAll('.edit-field[data-field]');
 
         editFields.forEach(field => {
             const fieldName = field.dataset.field;
+            if (!fieldName) return;
+
             let value = field.value.trim();
 
             // Convert number fields
@@ -671,6 +742,12 @@ async function saveHotelData() {
 
             updates[fieldName] = value;
         });
+
+        // Collect array data (room_mix, meeting_rooms, competitive_set)
+        const arrayData = collectArrayData();
+        updates.room_mix = arrayData.room_mix.length > 0 ? arrayData.room_mix : null;
+        updates.meeting_rooms = arrayData.meeting_rooms.length > 0 ? arrayData.meeting_rooms : null;
+        updates.competitive_set = arrayData.competitive_set.length > 0 ? arrayData.competitive_set : null;
 
         // Update in database
         const { data, error } = await supabase
@@ -727,4 +804,123 @@ function showSuccessMessage(message) {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+}
+
+// Global functions for array editing (need to be on window object)
+window.addRoomMixRow = function() {
+    const tbody = document.getElementById('room-mix-tbody');
+    const idx = tbody.querySelectorAll('tr').length;
+    const row = document.createElement('tr');
+    row.dataset.index = idx;
+    row.innerHTML = `
+        <td><input type="text" class="edit-input-sm" data-array="room_mix" data-index="${idx}" data-prop="type" value=""></td>
+        <td><input type="number" class="edit-input-sm" data-array="room_mix" data-index="${idx}" data-prop="count" value=""></td>
+        <td><input type="text" class="edit-input-sm" data-array="room_mix" data-index="${idx}" data-prop="sq_ft" value=""></td>
+        <td><button type="button" class="remove-row-btn" onclick="removeArrayRow('room_mix', ${idx})">×</button></td>
+    `;
+    tbody.appendChild(row);
+};
+
+window.addMeetingRoomRow = function() {
+    const tbody = document.getElementById('meeting-rooms-tbody');
+    const idx = tbody.querySelectorAll('tr').length;
+    const row = document.createElement('tr');
+    row.dataset.index = idx;
+    row.innerHTML = `
+        <td><input type="text" class="edit-input-sm" data-array="meeting_rooms" data-index="${idx}" data-prop="name" value=""></td>
+        <td><input type="text" class="edit-input-sm" data-array="meeting_rooms" data-index="${idx}" data-prop="sq_ft" value=""></td>
+        <td><input type="text" class="edit-input-sm" data-array="meeting_rooms" data-index="${idx}" data-prop="dimensions" value=""></td>
+        <td><button type="button" class="remove-row-btn" onclick="removeArrayRow('meeting_rooms', ${idx})">×</button></td>
+    `;
+    tbody.appendChild(row);
+};
+
+window.addCompSetRow = function() {
+    const list = document.getElementById('competitive-set-list');
+    const idx = list.querySelectorAll('.comp-set-row').length;
+    const row = document.createElement('div');
+    row.className = 'comp-set-row';
+    row.dataset.index = idx;
+    row.innerHTML = `
+        <input type="text" class="edit-input" data-array="competitive_set" data-index="${idx}" value="">
+        <button type="button" class="remove-row-btn" onclick="removeCompSetRow(${idx})">×</button>
+    `;
+    list.appendChild(row);
+};
+
+window.removeArrayRow = function(arrayName, index) {
+    const tbodyId = arrayName === 'room_mix' ? 'room-mix-tbody' : 'meeting-rooms-tbody';
+    const tbody = document.getElementById(tbodyId);
+    const row = tbody.querySelector(`tr[data-index="${index}"]`);
+    if (row) row.remove();
+    // Re-index remaining rows
+    tbody.querySelectorAll('tr').forEach((tr, newIdx) => {
+        tr.dataset.index = newIdx;
+        tr.querySelectorAll('input').forEach(input => {
+            input.dataset.index = newIdx;
+        });
+        tr.querySelector('.remove-row-btn').setAttribute('onclick', `removeArrayRow('${arrayName}', ${newIdx})`);
+    });
+};
+
+window.removeCompSetRow = function(index) {
+    const list = document.getElementById('competitive-set-list');
+    const row = list.querySelector(`.comp-set-row[data-index="${index}"]`);
+    if (row) row.remove();
+    // Re-index remaining rows
+    list.querySelectorAll('.comp-set-row').forEach((div, newIdx) => {
+        div.dataset.index = newIdx;
+        div.querySelector('input').dataset.index = newIdx;
+        div.querySelector('.remove-row-btn').setAttribute('onclick', `removeCompSetRow(${newIdx})`);
+    });
+};
+
+// Collect array data from edit forms
+function collectArrayData() {
+    const data = {
+        room_mix: [],
+        meeting_rooms: [],
+        competitive_set: []
+    };
+
+    // Collect room_mix
+    const roomMixRows = document.querySelectorAll('#room-mix-tbody tr');
+    roomMixRows.forEach(row => {
+        const type = row.querySelector('input[data-prop="type"]')?.value.trim();
+        const count = row.querySelector('input[data-prop="count"]')?.value;
+        const sq_ft = row.querySelector('input[data-prop="sq_ft"]')?.value.trim();
+        if (type || count) {
+            data.room_mix.push({
+                type: type || '',
+                count: count ? parseInt(count) : 0,
+                sq_ft: sq_ft || ''
+            });
+        }
+    });
+
+    // Collect meeting_rooms
+    const meetingRows = document.querySelectorAll('#meeting-rooms-tbody tr');
+    meetingRows.forEach(row => {
+        const name = row.querySelector('input[data-prop="name"]')?.value.trim();
+        const sq_ft = row.querySelector('input[data-prop="sq_ft"]')?.value.trim();
+        const dimensions = row.querySelector('input[data-prop="dimensions"]')?.value.trim();
+        if (name || sq_ft || dimensions) {
+            data.meeting_rooms.push({
+                name: name || '',
+                sq_ft: sq_ft || '',
+                dimensions: dimensions || ''
+            });
+        }
+    });
+
+    // Collect competitive_set
+    const compSetRows = document.querySelectorAll('#competitive-set-list .comp-set-row input');
+    compSetRows.forEach(input => {
+        const value = input.value.trim();
+        if (value) {
+            data.competitive_set.push(value);
+        }
+    });
+
+    return data;
 }
