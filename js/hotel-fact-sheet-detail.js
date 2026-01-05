@@ -2,6 +2,8 @@ import { supabase } from './supabase-config.js';
 
 let currentUser = null;
 let hotelData = null;
+let isEditMode = false;
+let originalData = null;
 
 // Check authentication and restrict to internal users only
 async function initPage() {
@@ -120,18 +122,51 @@ function displayHotelData(hotel) {
     // Extract brand
     const brand = extractBrand(hotel.hotel_name);
 
+    const isAdmin = currentUser && currentUser.role === 'admin';
+
     container.innerHTML = `
         <!-- Hotel Header -->
         <div class="hotel-header">
-            <h1 class="hotel-title">${escapeHtml(hotel.hotel_name)}</h1>
-            <div class="hotel-subtitle">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                ${escapeHtml(cityState || 'Location not specified')}
+            <div class="header-actions-row">
+                <div class="header-info">
+                    <h1 class="hotel-title">
+                        <span class="display-value">${escapeHtml(hotel.hotel_name)}</span>
+                        <input type="text" class="edit-input edit-field" data-field="hotel_name" value="${escapeHtml(hotel.hotel_name || '')}">
+                    </h1>
+                    <div class="hotel-subtitle">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        ${escapeHtml(cityState || 'Location not specified')}
+                    </div>
+                    ${brand ? `<span class="brand-badge-large">${escapeHtml(brand)}</span>` : ''}
+                </div>
+                ${isAdmin ? `
+                    <button class="edit-btn show" id="edit-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                        Edit
+                    </button>
+                    <div class="edit-actions" id="edit-actions">
+                        <button class="save-btn" id="save-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                            Save
+                        </button>
+                        <button class="cancel-btn" id="cancel-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                            Cancel
+                        </button>
+                    </div>
+                ` : ''}
             </div>
-            ${brand ? `<span class="brand-badge-large">${escapeHtml(brand)}</span>` : ''}
         </div>
 
         <div class="two-column-grid">
@@ -149,19 +184,23 @@ function displayHotelData(hotel) {
                     <div class="detail-grid">
                         <div class="detail-item">
                             <span class="detail-label">Owner LLC</span>
-                            <span class="detail-value ${!hotel.owner_llc ? 'empty' : ''}">${escapeHtml(hotel.owner_llc) || 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.owner_llc ? 'empty' : ''}">${escapeHtml(hotel.owner_llc) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="owner_llc" value="${escapeHtml(hotel.owner_llc || '')}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Operating Company</span>
-                            <span class="detail-value ${!hotel.operating_company_llc ? 'empty' : ''}">${escapeHtml(hotel.operating_company_llc) || 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.operating_company_llc ? 'empty' : ''}">${escapeHtml(hotel.operating_company_llc) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="operating_company_llc" value="${escapeHtml(hotel.operating_company_llc || '')}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Year Built</span>
-                            <span class="detail-value ${!hotel.year_built ? 'empty' : ''}">${hotel.year_built || 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.year_built ? 'empty' : ''}">${hotel.year_built || 'Not specified'}</span>
+                            <input type="number" class="edit-input edit-field" data-field="year_built" value="${hotel.year_built || ''}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Total Rooms</span>
-                            <span class="detail-value ${!hotel.total_rooms ? 'empty' : ''}">${hotel.total_rooms || 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.total_rooms ? 'empty' : ''}">${hotel.total_rooms || 'Not specified'}</span>
+                            <input type="number" class="edit-input edit-field" data-field="total_rooms" value="${hotel.total_rooms || ''}">
                         </div>
                     </div>
                 </div>
@@ -177,20 +216,44 @@ function displayHotelData(hotel) {
                     </h2>
                     <div class="detail-grid">
                         <div class="detail-item">
-                            <span class="detail-label">Address</span>
-                            <span class="detail-value ${!fullAddress ? 'empty' : ''}">${escapeHtml(fullAddress) || 'Not specified'}</span>
+                            <span class="detail-label">Street Address</span>
+                            <span class="detail-value display-value ${!hotel.address_street ? 'empty' : ''}">${escapeHtml(hotel.address_street) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="address_street" value="${escapeHtml(hotel.address_street || '')}">
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">City</span>
+                            <span class="detail-value display-value ${!hotel.address_city ? 'empty' : ''}">${escapeHtml(hotel.address_city) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="address_city" value="${escapeHtml(hotel.address_city || '')}">
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">State</span>
+                            <span class="detail-value display-value ${!hotel.address_state ? 'empty' : ''}">${escapeHtml(hotel.address_state) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="address_state" value="${escapeHtml(hotel.address_state || '')}">
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">ZIP</span>
+                            <span class="detail-value display-value ${!hotel.address_zip ? 'empty' : ''}">${escapeHtml(hotel.address_zip) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="address_zip" value="${escapeHtml(hotel.address_zip || '')}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Phone</span>
-                            <span class="detail-value ${!hotel.phone ? 'empty' : ''}">${hotel.phone ? `<a href="tel:${hotel.phone}">${formatPhone(hotel.phone)}</a>` : 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.phone ? 'empty' : ''}">${hotel.phone ? `<a href="tel:${hotel.phone}">${formatPhone(hotel.phone)}</a>` : 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="phone" value="${escapeHtml(hotel.phone || '')}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Website</span>
-                            <span class="detail-value ${!hotel.website ? 'empty' : ''}">${hotel.website ? `<a href="${formatUrl(hotel.website)}" target="_blank" rel="noopener">${escapeHtml(hotel.website)}</a>` : 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.website ? 'empty' : ''}">${hotel.website ? `<a href="${formatUrl(hotel.website)}" target="_blank" rel="noopener">${escapeHtml(hotel.website)}</a>` : 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="website" value="${escapeHtml(hotel.website || '')}">
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">County / Submarket</span>
-                            <span class="detail-value ${!hotel.county && !hotel.submarket ? 'empty' : ''}">${escapeHtml([hotel.county, hotel.submarket].filter(Boolean).join(' / ')) || 'Not specified'}</span>
+                            <span class="detail-label">County</span>
+                            <span class="detail-value display-value ${!hotel.county ? 'empty' : ''}">${escapeHtml(hotel.county) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="county" value="${escapeHtml(hotel.county || '')}">
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Submarket</span>
+                            <span class="detail-value display-value ${!hotel.submarket ? 'empty' : ''}">${escapeHtml(hotel.submarket) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="submarket" value="${escapeHtml(hotel.submarket || '')}">
                         </div>
                     </div>
                 </div>
@@ -208,23 +271,33 @@ function displayHotelData(hotel) {
                     <div class="detail-grid">
                         <div class="detail-item">
                             <span class="detail-label">Buildings</span>
-                            <span class="detail-value ${!hotel.num_buildings ? 'empty' : ''}">${hotel.num_buildings || 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.num_buildings ? 'empty' : ''}">${hotel.num_buildings || 'Not specified'}</span>
+                            <input type="number" class="edit-input edit-field" data-field="num_buildings" value="${hotel.num_buildings || ''}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Stories</span>
-                            <span class="detail-value ${!hotel.num_stories ? 'empty' : ''}">${hotel.num_stories || 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.num_stories ? 'empty' : ''}">${hotel.num_stories || 'Not specified'}</span>
+                            <input type="number" class="edit-input edit-field" data-field="num_stories" value="${hotel.num_stories || ''}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Total Square Footage</span>
-                            <span class="detail-value ${!hotel.total_sq_ft ? 'empty' : ''}">${hotel.total_sq_ft ? formatNumber(hotel.total_sq_ft) + ' sq ft' : 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.total_sq_ft ? 'empty' : ''}">${hotel.total_sq_ft ? formatNumber(hotel.total_sq_ft) + ' sq ft' : 'Not specified'}</span>
+                            <input type="number" class="edit-input edit-field" data-field="total_sq_ft" value="${hotel.total_sq_ft || ''}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Acreage</span>
-                            <span class="detail-value ${!hotel.acreage ? 'empty' : ''}">${hotel.acreage ? hotel.acreage + ' acres' : 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.acreage ? 'empty' : ''}">${hotel.acreage ? hotel.acreage + ' acres' : 'Not specified'}</span>
+                            <input type="number" step="0.01" class="edit-input edit-field" data-field="acreage" value="${hotel.acreage || ''}">
                         </div>
                         <div class="detail-item">
-                            <span class="detail-label">Parking</span>
-                            <span class="detail-value ${!hotel.parking_spaces && !hotel.parking_type ? 'empty' : ''}">${[hotel.parking_spaces ? hotel.parking_spaces + ' spaces' : null, hotel.parking_type].filter(Boolean).join(' - ') || 'Not specified'}</span>
+                            <span class="detail-label">Parking Spaces</span>
+                            <span class="detail-value display-value ${!hotel.parking_spaces ? 'empty' : ''}">${hotel.parking_spaces || 'Not specified'}</span>
+                            <input type="number" class="edit-input edit-field" data-field="parking_spaces" value="${hotel.parking_spaces || ''}">
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Parking Type</span>
+                            <span class="detail-value display-value ${!hotel.parking_type ? 'empty' : ''}">${escapeHtml(hotel.parking_type) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="parking_type" value="${escapeHtml(hotel.parking_type || '')}">
                         </div>
                     </div>
                 </div>
@@ -243,23 +316,28 @@ function displayHotelData(hotel) {
                     <div class="detail-grid">
                         <div class="detail-item">
                             <span class="detail-label">Purchase Date</span>
-                            <span class="detail-value ${!hotel.purchase_date ? 'empty' : ''}">${escapeHtml(hotel.purchase_date) || 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.purchase_date ? 'empty' : ''}">${escapeHtml(hotel.purchase_date) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="purchase_date" value="${escapeHtml(hotel.purchase_date || '')}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Open Date</span>
-                            <span class="detail-value ${!hotel.open_date ? 'empty' : ''}">${escapeHtml(hotel.open_date) || 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.open_date ? 'empty' : ''}">${escapeHtml(hotel.open_date) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="open_date" value="${escapeHtml(hotel.open_date || '')}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Marsha Code</span>
-                            <span class="detail-value ${!hotel.marsha_code ? 'empty' : ''}">${escapeHtml(hotel.marsha_code) || 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.marsha_code ? 'empty' : ''}">${escapeHtml(hotel.marsha_code) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="marsha_code" value="${escapeHtml(hotel.marsha_code || '')}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">STR Code</span>
-                            <span class="detail-value ${!hotel.str_code ? 'empty' : ''}">${escapeHtml(hotel.str_code) || 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.str_code ? 'empty' : ''}">${escapeHtml(hotel.str_code) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="str_code" value="${escapeHtml(hotel.str_code || '')}">
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">FEIN</span>
-                            <span class="detail-value ${!hotel.fein ? 'empty' : ''}">${escapeHtml(hotel.fein) || 'Not specified'}</span>
+                            <span class="detail-value display-value ${!hotel.fein ? 'empty' : ''}">${escapeHtml(hotel.fein) || 'Not specified'}</span>
+                            <input type="text" class="edit-input edit-field" data-field="fein" value="${escapeHtml(hotel.fein || '')}">
                         </div>
                     </div>
                 </div>
@@ -348,87 +426,84 @@ function displayHotelData(hotel) {
                 ` : ''}
 
                 <!-- Features & Amenities -->
-                ${hotel.features_amenities ? `
-                    <div class="detail-section">
-                        <h2 class="section-title">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="9 11 12 14 22 4"></polyline>
-                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                            </svg>
-                            Features & Amenities
-                        </h2>
-                        <div class="text-content">${escapeHtml(hotel.features_amenities)}</div>
-                    </div>
-                ` : ''}
+                <div class="detail-section">
+                    <h2 class="section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 11 12 14 22 4"></polyline>
+                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                        </svg>
+                        Features & Amenities
+                    </h2>
+                    <div class="text-content display-value ${!hotel.features_amenities ? 'empty' : ''}">${escapeHtml(hotel.features_amenities) || 'Not specified'}</div>
+                    <textarea class="edit-textarea edit-field" data-field="features_amenities" rows="4">${escapeHtml(hotel.features_amenities || '')}</textarea>
+                </div>
             </div>
         </div>
 
         <!-- Full Width Sections -->
-        ${hotel.renovations ? `
-            <div class="detail-section">
-                <h2 class="section-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                    </svg>
-                    Renovations
-                </h2>
-                <div class="text-content">${escapeHtml(hotel.renovations)}</div>
-            </div>
-        ` : ''}
+        <div class="detail-section">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                </svg>
+                Renovations
+            </h2>
+            <div class="text-content display-value ${!hotel.renovations ? 'empty' : ''}">${escapeHtml(hotel.renovations) || 'Not specified'}</div>
+            <textarea class="edit-textarea edit-field" data-field="renovations" rows="4">${escapeHtml(hotel.renovations || '')}</textarea>
+        </div>
 
-        ${hotel.franchise_brand || hotel.franchise_fees ? `
-            <div class="detail-section">
-                <h2 class="section-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="1" x2="12" y2="23"></line>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                    </svg>
-                    Franchise Information
-                </h2>
-                <div class="detail-grid">
-                    ${hotel.franchise_brand ? `
-                        <div class="detail-item">
-                            <span class="detail-label">Franchise Brand</span>
-                            <span class="detail-value">${escapeHtml(hotel.franchise_brand)}</span>
-                        </div>
-                    ` : ''}
-                    ${hotel.franchise_fees ? `
-                        <div class="detail-item" style="grid-column: span 2;">
-                            <span class="detail-label">Franchise Fees</span>
-                            <span class="detail-value">${escapeHtml(hotel.franchise_fees)}</span>
-                        </div>
-                    ` : ''}
+        <div class="detail-section">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                Franchise Information
+            </h2>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Franchise Brand</span>
+                    <span class="detail-value display-value ${!hotel.franchise_brand ? 'empty' : ''}">${escapeHtml(hotel.franchise_brand) || 'Not specified'}</span>
+                    <input type="text" class="edit-input edit-field" data-field="franchise_brand" value="${escapeHtml(hotel.franchise_brand || '')}">
+                </div>
+                <div class="detail-item" style="grid-column: span 2;">
+                    <span class="detail-label">Franchise Fees</span>
+                    <span class="detail-value display-value ${!hotel.franchise_fees ? 'empty' : ''}">${escapeHtml(hotel.franchise_fees) || 'Not specified'}</span>
+                    <textarea class="edit-textarea edit-field" data-field="franchise_fees" rows="2">${escapeHtml(hotel.franchise_fees || '')}</textarea>
                 </div>
             </div>
-        ` : ''}
+        </div>
 
-        ${hotel.common_area_retail ? `
-            <div class="detail-section">
-                <h2 class="section-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <path d="M16 10a4 4 0 0 1-8 0"></path>
-                    </svg>
-                    Common Area / Retail
-                </h2>
-                <div class="text-content">${escapeHtml(hotel.common_area_retail)}</div>
-            </div>
-        ` : ''}
+        <div class="detail-section">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                </svg>
+                Common Area / Retail
+            </h2>
+            <div class="text-content display-value ${!hotel.common_area_retail ? 'empty' : ''}">${escapeHtml(hotel.common_area_retail) || 'Not specified'}</div>
+            <textarea class="edit-textarea edit-field" data-field="common_area_retail" rows="4">${escapeHtml(hotel.common_area_retail || '')}</textarea>
+        </div>
 
-        ${hotel.lender_info ? `
-            <div class="detail-section">
-                <h2 class="section-title">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                        <line x1="1" y1="10" x2="23" y2="10"></line>
-                    </svg>
-                    Lender Information
-                </h2>
-                <div class="text-content">${escapeHtml(hotel.lender_info)}</div>
-            </div>
-        ` : ''}
+        <div class="detail-section">
+            <h2 class="section-title">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                </svg>
+                Lender Information
+            </h2>
+            <div class="text-content display-value ${!hotel.lender_info ? 'empty' : ''}">${escapeHtml(hotel.lender_info) || 'Not specified'}</div>
+            <textarea class="edit-textarea edit-field" data-field="lender_info" rows="4">${escapeHtml(hotel.lender_info || '')}</textarea>
+        </div>
     `;
+
+    // Set up edit event handlers if admin
+    if (isAdmin) {
+        setupEditHandlers();
+    }
 }
 
 // Helper functions
@@ -497,4 +572,159 @@ function extractBrand(hotelName) {
     }
 
     return null;
+}
+
+// Set up edit event handlers
+function setupEditHandlers() {
+    const editBtn = document.getElementById('edit-btn');
+    const saveBtn = document.getElementById('save-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+
+    if (editBtn) {
+        editBtn.addEventListener('click', () => toggleEditMode(true));
+    }
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveHotelData);
+    }
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => cancelEdit());
+    }
+}
+
+// Toggle edit mode
+function toggleEditMode(enable) {
+    isEditMode = enable;
+
+    const editBtn = document.getElementById('edit-btn');
+    const editActions = document.getElementById('edit-actions');
+    const displayValues = document.querySelectorAll('.display-value');
+    const editFields = document.querySelectorAll('.edit-field');
+
+    if (enable) {
+        // Store original data for cancel
+        originalData = { ...hotelData };
+
+        // Hide edit button, show save/cancel
+        if (editBtn) editBtn.classList.remove('show');
+        if (editActions) editActions.classList.add('show');
+
+        // Hide display values, show edit fields
+        displayValues.forEach(el => el.style.display = 'none');
+        editFields.forEach(el => el.classList.add('show'));
+    } else {
+        // Show edit button, hide save/cancel
+        if (editBtn) editBtn.classList.add('show');
+        if (editActions) editActions.classList.remove('show');
+
+        // Show display values, hide edit fields
+        displayValues.forEach(el => el.style.display = '');
+        editFields.forEach(el => el.classList.remove('show'));
+    }
+}
+
+// Cancel edit and restore original values
+function cancelEdit() {
+    // Restore original values to inputs
+    const editFields = document.querySelectorAll('.edit-field');
+    editFields.forEach(field => {
+        const fieldName = field.dataset.field;
+        if (fieldName && originalData) {
+            field.value = originalData[fieldName] || '';
+        }
+    });
+
+    toggleEditMode(false);
+}
+
+// Save hotel data to database
+async function saveHotelData() {
+    const saveBtn = document.getElementById('save-btn');
+    const editActions = document.getElementById('edit-actions');
+
+    // Show saving state
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `
+        <span class="saving-indicator">
+            <span class="spinner"></span>
+            Saving...
+        </span>
+    `;
+
+    try {
+        // Collect all edited values
+        const updates = {};
+        const editFields = document.querySelectorAll('.edit-field');
+
+        editFields.forEach(field => {
+            const fieldName = field.dataset.field;
+            let value = field.value.trim();
+
+            // Convert number fields
+            if (field.type === 'number') {
+                value = value === '' ? null : Number(value);
+            }
+
+            // Convert empty strings to null
+            if (value === '') {
+                value = null;
+            }
+
+            updates[fieldName] = value;
+        });
+
+        // Update in database
+        const { data, error } = await supabase
+            .from('hotel_fact_sheets')
+            .update(updates)
+            .eq('id', hotelData.id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Update local data
+        hotelData = data;
+        document.title = `${data.hotel_name} - Hotel Fact Sheet - Noble`;
+
+        // Re-render the page with updated data
+        displayHotelData(data);
+
+        // Show success message briefly
+        showSuccessMessage('Changes saved successfully!');
+
+    } catch (error) {
+        console.error('Error saving hotel data:', error);
+        alert('Error saving changes: ' + error.message);
+
+        // Restore save button
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Save
+        `;
+    }
+}
+
+// Show success message
+function showSuccessMessage(message) {
+    const toast = document.createElement('div');
+    toast.className = 'success-toast';
+    toast.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        ${message}
+    `;
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
