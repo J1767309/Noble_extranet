@@ -121,6 +121,52 @@
             font-weight: 500;
         }
 
+        .hotel-contact-section {
+            border-top: 1px solid #e5e7eb;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+        }
+
+        .hotel-contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem 1rem;
+        }
+
+        .contact-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contact-label {
+            font-size: 0.6875rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.125rem;
+        }
+
+        .contact-value {
+            font-size: 0.8125rem;
+            color: #1a1a1a;
+            word-break: break-word;
+        }
+
+        .contact-value a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .contact-value a:hover {
+            text-decoration: underline;
+        }
+
+        .contact-value.empty {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
         .no-results {
             text-align: center;
             padding: 3rem;

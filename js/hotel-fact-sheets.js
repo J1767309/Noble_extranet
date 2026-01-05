@@ -184,6 +184,8 @@ function displayHotels(hotels) {
     container.innerHTML = hotels.map(hotel => {
         const brand = extractBrand(hotel.hotel_name);
         const location = [hotel.address_city, hotel.address_state].filter(Boolean).join(', ');
+        const fullAddress = [hotel.address_street, hotel.address_city, hotel.address_state, hotel.address_zip].filter(Boolean).join(', ');
+        const countySubmarket = [hotel.county, hotel.submarket].filter(Boolean).join(' / ');
 
         return `
             <a href="hotel-fact-sheet-detail.html?id=${hotel.id}" class="hotel-card">
@@ -218,6 +220,26 @@ function displayHotels(hotels) {
                     ` : ''}
                 </div>
                 ${brand ? `<span class="brand-badge">${escapeHtml(brand)}</span>` : ''}
+                <div class="hotel-contact-section">
+                    <div class="hotel-contact-grid">
+                        <div class="contact-item">
+                            <span class="contact-label">Address</span>
+                            <span class="contact-value ${!fullAddress ? 'empty' : ''}">${escapeHtml(fullAddress) || 'Not specified'}</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">Phone</span>
+                            <span class="contact-value ${!hotel.phone ? 'empty' : ''}">${hotel.phone ? formatPhone(hotel.phone) : 'Not specified'}</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">Website</span>
+                            <span class="contact-value ${!hotel.website ? 'empty' : ''}">${hotel.website ? escapeHtml(hotel.website) : 'Not specified'}</span>
+                        </div>
+                        <div class="contact-item">
+                            <span class="contact-label">County / Submarket</span>
+                            <span class="contact-value ${!countySubmarket ? 'empty' : ''}">${escapeHtml(countySubmarket) || 'Not specified'}</span>
+                        </div>
+                    </div>
+                </div>
             </a>
         `;
     }).join('');
@@ -229,6 +251,16 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Format phone number
+function formatPhone(phone) {
+    if (!phone) return '';
+    const cleaned = phone.replace(/\D/g, '');
+    if (cleaned.length === 10) {
+        return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+    }
+    return phone;
 }
 
 // Setup event listeners
